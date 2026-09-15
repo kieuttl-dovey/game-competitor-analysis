@@ -90,3 +90,63 @@ h1,h2,h3,h4,.brand-title,.project-name,.card-title,.metric-value,.nav-label{font
 @media (max-width:600px){.brand-title{font-size:13px}.brand-mark{min-width:58px;padding:0 9px;font-size:13px}.top-actions .btn{padding:7px 9px;font-size:10.5px}.evidence-card-body{grid-template-columns:1fr}.evidence-block{border-right:0;border-bottom:1px solid var(--line)}.evidence-block:last-child{border-bottom:0}.adjustment-card-head{grid-template-columns:1fr 1fr}.adjustment-category{grid-column:1/-1}.idea-status{grid-template-columns:1fr}.score-summary{grid-template-columns:1fr 1fr}.page-title{font-size:23px}.card-body{padding:13px}.card-head{padding:13px}}
 
 @media print{.topbar,.sidebar,.guide-panel,.page-actions,.sidebar-actions,.toast{display:none!important}.app-shell{display:block}.main-content{padding:0;max-width:none}.card{box-shadow:none;break-inside:avoid}.data-table th{position:static}.cell-input,.cell-textarea,.cell-select,.field input,.field textarea,.field select{border:0;padding:0;resize:none;background:transparent}.table-wrap{overflow:visible}.data-table{min-width:0;font-size:9px}.adjustment-card,.evidence-card,.change-card,.revised-card{break-inside:avoid}}
+
+/* V3 — Decision color system for Idea Adjustment */
+:root{
+  --keep:#16845b;
+  --keep-soft:#eef9f4;
+  --keep-line:#9fd8c2;
+  --add:#0078d7;
+  --add-soft:#eef7ff;
+  --add-line:#a8d4f6;
+  --change:#b86a00;
+  --change-soft:#fff7e8;
+  --change-line:#f0c67d;
+  --remove:#b4232f;
+  --remove-soft:#fff1f2;
+  --remove-line:#efb5bb;
+}
+.decision-legend{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fbfdff}
+.legend-label{font:700 10px/1 "Space Grotesk",sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:2px}
+.legend-chip{display:inline-flex;align-items:center;min-height:24px;padding:4px 8px;border-radius:999px;border:1px solid transparent;font-size:10px;font-weight:700;line-height:1;white-space:nowrap}
+.legend-chip.keep{background:var(--keep-soft);border-color:var(--keep-line);color:var(--keep)}
+.legend-chip.add{background:var(--add-soft);border-color:var(--add-line);color:var(--add)}
+.legend-chip.change{background:var(--change-soft);border-color:var(--change-line);color:var(--change)}
+.legend-chip.remove{background:var(--remove-soft);border-color:var(--remove-line);color:var(--remove)}
+.legend-chip.p0{background:#fff0f0;border-color:#efb6b6;color:#aa2323}
+.legend-chip.p1{background:#fff7e8;border-color:#f0ca86;color:#9a5b00}
+.legend-chip.p2{background:var(--iris);border-color:#d8d6ff;color:#514eb9}
+.legend-sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+
+.adjustment-card{position:relative;border-left-width:4px;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.adjustment-card:hover{box-shadow:0 6px 20px rgba(3,4,28,.06)}
+.adjustment-card.action-keep{border-left-color:var(--keep)}
+.adjustment-card.action-add{border-left-color:var(--add)}
+.adjustment-card.action-change{border-left-color:var(--change)}
+.adjustment-card.action-remove{border-left-color:var(--remove)}
+.adjustment-card.action-keep .adjustment-card-head{background:linear-gradient(90deg,var(--keep-soft),#fbfdff 44%)}
+.adjustment-card.action-add .adjustment-card-head{background:linear-gradient(90deg,var(--add-soft),#fbfdff 44%)}
+.adjustment-card.action-change .adjustment-card-head{background:linear-gradient(90deg,var(--change-soft),#fbfdff 44%)}
+.adjustment-card.action-remove .adjustment-card-head{background:linear-gradient(90deg,var(--remove-soft),#fbfdff 44%)}
+
+.action-select,.priority-select{font-family:"Space Grotesk","Roboto",sans-serif;font-weight:700!important}
+.action-select.action-keep{background:var(--keep-soft);border-color:var(--keep-line);color:var(--keep)}
+.action-select.action-add{background:var(--add-soft);border-color:var(--add-line);color:var(--add)}
+.action-select.action-change{background:var(--change-soft);border-color:var(--change-line);color:var(--change)}
+.action-select.action-remove{background:var(--remove-soft);border-color:var(--remove-line);color:var(--remove)}
+.priority-select.priority-p0{background:#fff0f0;border-color:#efb6b6;color:#aa2323}
+.priority-select.priority-p1{background:#fff7e8;border-color:#f0ca86;color:#9a5b00}
+.priority-select.priority-p2{background:var(--iris);border-color:#d8d6ff;color:#514eb9}
+
+.field-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.dot-current{background:#a0a3bd}.dot-competitor{background:var(--cyan)}.dot-suggestion{background:var(--primary)}.dot-reference{background:var(--purple)}.dot-rationale{background:#6f6c8f}
+.field-current .readonly-box{background:#f7f8fb;border-color:#e2e6ee}
+.field-competitor .cell-textarea{background:#f5fbff;border-color:#c8e7f8}
+.field-reference .cell-input{background:#faf9ff;border-color:#dddafc}
+.field-rationale .cell-textarea{background:#fbfcff}
+.adjustment-card.action-keep .field-suggestion .cell-textarea{background:var(--keep-soft);border-color:var(--keep-line)}
+.adjustment-card.action-add .field-suggestion .cell-textarea{background:var(--add-soft);border-color:var(--add-line)}
+.adjustment-card.action-change .field-suggestion .cell-textarea{background:var(--change-soft);border-color:var(--change-line)}
+.adjustment-card.action-remove .field-suggestion .cell-textarea{background:var(--remove-soft);border-color:var(--remove-line)}
+
+@media (max-width:700px){.legend-sep{display:none}.decision-legend{align-items:flex-start}.legend-label{width:100%;margin-top:2px}}

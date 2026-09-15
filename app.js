@@ -162,18 +162,20 @@
 
     const adjustRows=ia.rows.map((r,i)=>{
       const current=r.originalKey?state.originalIdea[r.originalKey]:(r.current||'');
-      return `<div class="adjustment-card">
+      const actionClass='action-'+String(r.action||'KEEP').toLowerCase();
+      const priorityClass='priority-'+String(r.priority||'P1').toLowerCase();
+      return `<div class="adjustment-card ${actionClass}">
         <div class="adjustment-card-head">
           <div class="adjustment-category">${esc(r.category)}</div>
-          <select class="cell-select" data-bind="ideaAdjustment.rows.${i}.action">${['KEEP','ADD','CHANGE','REMOVE'].map(x=>`<option ${r.action===x?'selected':''}>${x}</option>`).join('')}</select>
-          <select class="cell-select" data-bind="ideaAdjustment.rows.${i}.priority">${['P0','P1','P2'].map(x=>`<option ${r.priority===x?'selected':''}>${x}</option>`).join('')}</select>
+          <select class="cell-select action-select ${actionClass}" aria-label="Hành động" data-bind="ideaAdjustment.rows.${i}.action">${['KEEP','ADD','CHANGE','REMOVE'].map(x=>`<option ${r.action===x?'selected':''}>${x}</option>`).join('')}</select>
+          <select class="cell-select priority-select ${priorityClass}" aria-label="Mức ưu tiên" data-bind="ideaAdjustment.rows.${i}.priority">${['P0','P1','P2'].map(x=>`<option ${r.priority===x?'selected':''}>${x}</option>`).join('')}</select>
         </div>
         <div class="adjustment-card-body">
-          <div class="adjust-field"><span class="mini-label">Idea hiện tại</span><div class="readonly-box">${esc(current||'Chưa xác định')}</div></div>
-          <div class="adjust-field"><span class="mini-label">Đối thủ đang làm gì</span><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.competitorsDoing">${esc(r.competitorsDoing)}</textarea></div>
-          <div class="adjust-field span-8"><span class="mini-label">Đề xuất cho idea</span><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.suggestion">${esc(r.suggestion)}</textarea></div>
-          <div class="adjust-field span-4"><span class="mini-label">Game tham khảo</span><input class="cell-input" data-bind="ideaAdjustment.rows.${i}.references" value="${esc(r.references)}"></div>
-          <div class="adjust-field span-12"><span class="mini-label">Vì sao nên làm</span><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.rationale">${esc(r.rationale)}</textarea></div>
+          <div class="adjust-field field-current"><span class="mini-label"><span class="field-dot dot-current"></span>Idea hiện tại</span><div class="readonly-box">${esc(current||'Chưa xác định')}</div></div>
+          <div class="adjust-field field-competitor"><span class="mini-label"><span class="field-dot dot-competitor"></span>Đối thủ đang làm gì</span><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.competitorsDoing">${esc(r.competitorsDoing)}</textarea></div>
+          <div class="adjust-field span-8 field-suggestion"><span class="mini-label"><span class="field-dot dot-suggestion"></span>Đề xuất cho idea</span><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.suggestion">${esc(r.suggestion)}</textarea></div>
+          <div class="adjust-field span-4 field-reference"><span class="mini-label"><span class="field-dot dot-reference"></span>Game tham khảo</span><input class="cell-input" data-bind="ideaAdjustment.rows.${i}.references" value="${esc(r.references)}"></div>
+          <div class="adjust-field span-12 field-rationale"><span class="mini-label"><span class="field-dot dot-rationale"></span>Vì sao nên làm</span><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.rationale">${esc(r.rationale)}</textarea></div>
         </div>
       </div>`;
     }).join('');
@@ -197,7 +199,7 @@
 
       <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">2</span>COMPETITOR EVIDENCE — MỖI TAB CON ĐÓNG GÓP GÌ?</h2><div class="card-desc">Tự kéo từ Mục 4 của từng competitor.</div></div></div><div class="card-body"><div class="evidence-list">${evidence}</div></div></div>
 
-      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">3</span>IDEA ADJUSTMENT SCORECARD</h2><div class="card-desc">Với từng hạng mục, chốt nên giữ, bổ sung, thay đổi hay bỏ.</div></div></div><div class="card-body"><div class="adjustment-list">${adjustRows}</div><div class="notice" style="margin-top:12px"><b>KEEP</b> = giữ · <b>ADD</b> = bổ sung · <b>CHANGE</b> = thay đổi · <b>REMOVE</b> = bỏ / tránh.</div></div></div>
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">3</span>IDEA ADJUSTMENT SCORECARD</h2><div class="card-desc">Với từng hạng mục, chốt nên giữ, bổ sung, thay đổi hay bỏ.</div></div></div><div class="card-body"><div class="decision-legend" aria-label="Quy ước màu"><span class="legend-label">Action</span><span class="legend-chip keep">KEEP · Giữ</span><span class="legend-chip add">ADD · Bổ sung</span><span class="legend-chip change">CHANGE · Thay đổi</span><span class="legend-chip remove">REMOVE · Bỏ / tránh</span><span class="legend-sep"></span><span class="legend-label">Priority</span><span class="legend-chip p0">P0 · Quan trọng nhất</span><span class="legend-chip p1">P1 · Quan trọng</span><span class="legend-chip p2">P2 · Có thể làm sau</span></div><div class="adjustment-list">${adjustRows}</div></div></div>
 
       <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">4</span>TOP CHANGES — 3 THAY ĐỔI QUAN TRỌNG NHẤT</h2></div></div><div class="card-body"><div class="changes-list">${changes}</div></div></div>
 
@@ -272,6 +274,7 @@
     if(route.view==='competitor' && el.dataset.bind==='name') renderSidebar();
     saveState();
     if(route.view==='competitor' && el.dataset.bind.includes('.score')) renderCompetitor(getComp());
+    if(route.view==='idea' && (el.dataset.bind.endsWith('.action') || el.dataset.bind.endsWith('.priority'))) renderIdea();
   }
 
   document.addEventListener('click', e=>{
