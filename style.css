@@ -150,3 +150,10 @@ h1,h2,h3,h4,.brand-title,.project-name,.card-title,.metric-value,.nav-label{font
 .adjustment-card.action-remove .field-suggestion .cell-textarea{background:var(--remove-soft);border-color:var(--remove-line)}
 
 @media (max-width:700px){.legend-sep{display:none}.decision-legend{align-items:flex-start}.legend-label{width:100%;margin-top:2px}}
+
+/* V4 — New project = new repository */
+.modal-wide{width:min(860px,100%)}
+.setup-note{margin-bottom:16px;padding:12px 14px;border:1px solid #cbd9ff;background:#f2f7ff;color:#1b3f8f;border-radius:10px;font-size:12px;line-height:1.55}
+.new-project-result{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fbfdff}
+.new-project-result[hidden]{display:none!important}
+.new-project-result .btn{display:inline-flex;align-items:center;text-decoration:none}

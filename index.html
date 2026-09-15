@@ -50,6 +50,46 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <div id="newProjectModal" class="modal-backdrop" hidden>
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="newProjectModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="newProjectModalTitle">Tạo project mới = Repo mới</h2>
+          <p>Clone web template hiện tại sang một repository mới, tạo data project trắng và bật GitHub Pages.</p>
+        </div>
+        <button class="icon-btn" id="newProjectModalClose" aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="setup-note">
+          <b>Setup 1 lần:</b> repo nguồn phải được bật <b>Template repository</b>. Token tạo project cần <b>Repository access: All repositories</b> và quyền <b>Administration: Read and write</b>, <b>Contents: Read and write</b>, <b>Pages: Read and write</b>.
+        </div>
+        <div class="form-grid two">
+          <div class="field"><label>Tên project</label><input id="npProjectName" placeholder="Detective Puzzle — Competitor Analysis" /></div>
+          <div class="field"><label>Repo name</label><input id="npRepoName" placeholder="detective-puzzle-analysis" /></div>
+          <div class="field"><label>Owner / Organization</label><input id="npOwner" placeholder="github-owner" /></div>
+          <div class="field"><label>Visibility</label><select id="npVisibility"><option value="public">Public</option><option value="private">Private</option></select></div>
+          <div class="field"><label>Template owner</label><input id="npTemplateOwner" /></div>
+          <div class="field"><label>Template repository</label><input id="npTemplateRepo" /></div>
+          <div class="field span-2"><label>Mô tả repo</label><input id="npDescription" /></div>
+          <div class="field span-2"><label>Token tạo project</label><input id="npToken" type="password" autocomplete="off" placeholder="github_pat_..." /></div>
+        </div>
+        <label class="check-row"><input id="npEnablePages" type="checkbox" checked /> Tự bật GitHub Pages từ branch mặc định / root</label>
+        <div class="security-note">
+          <b>Lưu ý:</b> token cũ chỉ có quyền Contents trên 1 repo sẽ <b>không đủ</b> để tạo repo mới. Token không được ghi vào repo hay file JSON; chỉ giữ trong phiên trình duyệt hiện tại.
+        </div>
+        <div id="newProjectStatus" class="github-status">Chưa bắt đầu.</div>
+        <div id="newProjectResult" class="new-project-result" hidden>
+          <a class="btn secondary" id="npOpenRepo" target="_blank" rel="noopener">Mở repo mới</a>
+          <a class="btn primary" id="npOpenPages" target="_blank" rel="noopener">Mở GitHub Pages</a>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="newProjectCancelBtn">Đóng</button>
+        <button class="btn primary" id="npCreateBtn">Tạo repo & project</button>
+      </div>
+    </div>
+  </div>
+
   <div id="githubModal" class="modal-backdrop" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="githubModalTitle">
       <div class="modal-head">

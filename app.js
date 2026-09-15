@@ -1,9 +1,19 @@
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'game-competitor-analysis-v1';
-  const GITHUB_CONFIG_KEY = 'game-competitor-analysis-github-config-v1';
+  const BASE_STORAGE_KEY = 'game-competitor-analysis-v1';
+  const BASE_GITHUB_CONFIG_KEY = 'game-competitor-analysis-github-config-v1';
   const GITHUB_TOKEN_KEY = 'game-competitor-analysis-github-token-v1';
+  const SITE_SCOPE = (() => {
+    const host=location.hostname||'local';
+    if(host.endsWith('.github.io')){
+      const seg=(location.pathname||'/').split('/').filter(Boolean);
+      return seg[0] || host;
+    }
+    return host==='local' ? 'local' : `${host}${location.pathname||'/'}`;
+  })();
+  const STORAGE_KEY = `${BASE_STORAGE_KEY}::${SITE_SCOPE}`;
+  const GITHUB_CONFIG_KEY = `${BASE_GITHUB_CONFIG_KEY}::${SITE_SCOPE}`;
   const FACTORS = [
     {key:'coreMechanic', label:'Core mechanic', weight:.20, question:'Cách chơi chính có giống idea gốc không?'},
     {key:'coreLoop', label:'Core loop', weight:.10, question:'Chu trình chơi → hoàn thành mục tiêu → nhận thưởng → chơi tiếp có giống không?'},
@@ -35,9 +45,20 @@
   const esc = (v='') => String(v ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
 
   function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function canMigrateLegacyStorage(){
+    if(!(location.hostname||'').endsWith('.github.io')) return true;
+    try{
+      const legacyCfg=JSON.parse(localStorage.getItem(BASE_GITHUB_CONFIG_KEY)||'{}');
+      return !legacyCfg.repo || legacyCfg.repo===SITE_SCOPE;
+    }catch(e){ return false; }
+  }
   function loadState(){
     try{
-      const raw = localStorage.getItem(STORAGE_KEY);
+      let raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw && canMigrateLegacyStorage()){
+        raw=localStorage.getItem(BASE_STORAGE_KEY);
+        if(raw) localStorage.setItem(STORAGE_KEY,raw);
+      }
       return raw ? JSON.parse(raw) : clone(window.DEFAULT_PROJECT);
     }catch(e){ return clone(window.DEFAULT_PROJECT); }
   }
@@ -61,6 +82,16 @@
       why:{reason:'',similarity:'',difference:''}, factors,
       learning:{learn:'',avoid:'',impact:'',risk:'',conclusion:'',sources:''}
     };
+  }
+  function createBlankProjectState(projectName='New Game — Competitor Analysis'){
+    const fresh=clone(window.DEFAULT_PROJECT);
+    fresh.projectName=projectName;
+    fresh.originalIdea={workingTitle:'',genrePlatform:'',coreMechanic:'',coreLoop:'',metaProgression:'',audienceTheme:'',uspHook:'',monetExpected:''};
+    fresh.competitors=[];
+    fresh.ideaAdjustment.rows.forEach(r=>{r.competitorsDoing='';r.suggestion='';r.references='';r.rationale='';r.action='KEEP';r.priority='P1';if(r.current)r.current='';});
+    fresh.ideaAdjustment.topChanges.forEach(r=>Object.keys(r).forEach(k=>r[k]=k==='priority'?'P1':k==='action'?'ADD':''));
+    fresh.ideaAdjustment.final={summary:'',keep:'',add:'',change:'',remove:'',reference:'',call:'ITERATE IDEA',nextTest:''};
+    return fresh;
   }
   function getComp(){ return state.competitors.find(c=>c.id===route.competitorId); }
   function getByPath(obj, path){ return path.split('.').reduce((a,k)=>a?.[k],obj); }
@@ -305,16 +336,126 @@
   function importJson(e){
     const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{try{const x=JSON.parse(reader.result); if(!x.originalIdea||!Array.isArray(x.competitors)) throw new Error('Sai format'); state=x; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render(); showToast('Import thành công');}catch(err){alert('File JSON không đúng format của template.');}}; reader.readAsText(file); e.target.value='';
   }
-  function newProject(){
-    if(!confirm('Tạo project mới? Hãy Export JSON trước nếu muốn giữ dữ liệu hiện tại.')) return;
-    state=clone(window.DEFAULT_PROJECT); state.projectName='New Game — Competitor Analysis';
-    state.originalIdea={workingTitle:'',genrePlatform:'',coreMechanic:'',coreLoop:'',metaProgression:'',audienceTheme:'',uspHook:'',monetExpected:''};
-    state.competitors=[];
-    state.ideaAdjustment.rows.forEach(r=>{r.competitorsDoing='';r.suggestion='';r.references='';r.rationale='';r.action='KEEP';r.priority='P1'; if(r.current)r.current='';});
-    state.ideaAdjustment.topChanges.forEach(r=>Object.keys(r).forEach(k=>r[k]=k==='priority'?'P1':k==='action'?'ADD':''));
-    state.ideaAdjustment.final={summary:'',keep:'',add:'',change:'',remove:'',reference:'',call:'ITERATE IDEA',nextTest:''};
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render();
+  function repoSlug(value){
+    return String(value||'')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .toLowerCase().trim().replace(/[^a-z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^[-.]+|[-.]+$/g,'').slice(0,100);
   }
+  function newProjectStatus(msg,type=''){
+    const el=$('#newProjectStatus'); if(!el) return;
+    el.textContent=msg; el.className='github-status'+(type?' '+type:'');
+  }
+  function openNewProjectModal(){
+    const cfg=getGitHubConfig();
+    const owner=cfg.owner||inferGitHubDefaults().owner||'';
+    const projectName='New Game — Competitor Analysis';
+    $('#npProjectName').value=projectName;
+    $('#npRepoName').value=repoSlug(projectName.replace(/competitor analysis/ig,'analysis'))||'new-game-analysis';
+    $('#npOwner').value=owner;
+    $('#npTemplateOwner').value=cfg.owner||owner;
+    $('#npTemplateRepo').value=cfg.repo||SITE_SCOPE;
+    $('#npDescription').value='Game competitor analysis — SAVA template';
+    $('#npVisibility').value='public';
+    $('#npEnablePages').checked=true;
+    $('#npToken').value=getGitHubToken();
+    $('#newProjectResult').hidden=true;
+    $('#npOpenRepo').removeAttribute('href');
+    $('#npOpenPages').removeAttribute('href');
+    newProjectStatus(getGitHubToken()?'Sẵn sàng. Có thể dùng token hiện tại nếu token có đủ quyền tạo repo.':'Cần token có quyền tạo repo mới.','');
+    $('#newProjectModal').hidden=false;
+  }
+  function closeNewProjectModal(){ $('#newProjectModal').hidden=true; }
+  function readNewProjectForm(){
+    return {
+      projectName:$('#npProjectName').value.trim(), repo:$('#npRepoName').value.trim(), owner:$('#npOwner').value.trim(),
+      templateOwner:$('#npTemplateOwner').value.trim(), templateRepo:$('#npTemplateRepo').value.trim(),
+      description:$('#npDescription').value.trim(), private:$('#npVisibility').value==='private', enablePages:$('#npEnablePages').checked,
+      token:$('#npToken').value.trim()
+    };
+  }
+  function validateNewProjectForm(cfg){
+    if(!cfg.projectName||!cfg.repo||!cfg.owner||!cfg.templateOwner||!cfg.templateRepo) throw new Error('Thiếu tên project, repo, owner hoặc template repo.');
+    if(!/^[A-Za-z0-9._-]{1,100}$/.test(cfg.repo)) throw new Error('Repo name chỉ dùng chữ, số, dấu ., - hoặc _.');
+    if(!cfg.token) throw new Error('Cần Fine-grained Personal Access Token để tạo repo mới.');
+  }
+  async function waitForRepoFile(owner,repo,path,branch,token,attempts=8){
+    const url=`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${ghEncodePath(path)}`;
+    let lastErr=null;
+    for(let i=0;i<attempts;i++){
+      try{return await githubRequest(url+`?ref=${encodeURIComponent(branch)}`,{headers:githubHeaders(token)});}catch(err){lastErr=err;if(err.status!==404) throw err;}
+      await new Promise(r=>setTimeout(r,700+350*i));
+    }
+    throw lastErr||new Error('Chưa đọc được file từ repo mới.');
+  }
+  async function enablePagesForRepo(owner,repo,branch,token){
+    const url=`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pages`;
+    for(let i=0;i<5;i++){
+      try{
+        return await githubRequest(url,{method:'POST',headers:{...githubHeaders(token),'Content-Type':'application/json'},body:JSON.stringify({source:{branch,path:'/'}})});
+      }catch(err){
+        if(err.status===409){
+          try{return await githubRequest(url,{headers:githubHeaders(token)});}catch(e){throw err;}
+        }
+        if((err.status===404||err.status===422) && i<4){await new Promise(r=>setTimeout(r,900+500*i));continue;}
+        throw err;
+      }
+    }
+  }
+  async function createNewProjectRepo(){
+    if(githubBusy) return;
+    const cfg=readNewProjectForm();
+    try{
+      validateNewProjectForm(cfg); setGitHubToken(cfg.token); githubBusy=true; $('#npCreateBtn').disabled=true;
+      newProjectStatus('1/4 — Đang kiểm tra template repo...','working');
+      const templateUrl=`https://api.github.com/repos/${encodeURIComponent(cfg.templateOwner)}/${encodeURIComponent(cfg.templateRepo)}`;
+      const templateMeta=await githubRequest(templateUrl,{headers:githubHeaders(cfg.token)});
+      if(!templateMeta.is_template){
+        throw new Error(`Repo ${cfg.templateOwner}/${cfg.templateRepo} chưa được bật “Template repository”. Vào repo → Settings → General → tick “Template repository”, rồi thử lại.`);
+      }
+
+      newProjectStatus('2/4 — Đang tạo repo mới từ template...','working');
+      const created=await githubRequest(`https://api.github.com/repos/${encodeURIComponent(cfg.templateOwner)}/${encodeURIComponent(cfg.templateRepo)}/generate`,{
+        method:'POST', headers:{...githubHeaders(cfg.token),'Content-Type':'application/json'},
+        body:JSON.stringify({owner:cfg.owner,name:cfg.repo,description:cfg.description,include_all_branches:false,private:cfg.private})
+      });
+      const branch=created.default_branch||'main';
+      const blank=createBlankProjectState(cfg.projectName);
+
+      newProjectStatus('3/4 — Đang khởi tạo data/project.json trắng...','working');
+      const remote=await waitForRepoFile(cfg.owner,cfg.repo,'data/project.json',branch,cfg.token);
+      const dataUrl=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/data/project.json`;
+      const initResult=await githubRequest(dataUrl,{
+        method:'PUT',headers:{...githubHeaders(cfg.token),'Content-Type':'application/json'},
+        body:JSON.stringify({message:`Initialize project: ${cfg.projectName}`,content:utf8ToBase64(JSON.stringify(blank,null,2)),sha:remote.sha,branch})
+      });
+
+      let pagesUrl=`https://${cfg.owner}.github.io/${cfg.repo}/`;
+      let pagesWarning='';
+      if(cfg.enablePages){
+        newProjectStatus('4/4 — Đang bật GitHub Pages...','working');
+        try{
+          const pages=await enablePagesForRepo(cfg.owner,cfg.repo,branch,cfg.token);
+          pagesUrl=pages?.html_url||pagesUrl;
+        }catch(err){
+          pagesWarning=`Repo đã tạo thành công nhưng chưa bật được Pages: ${err.message}. Có thể bật thủ công ở Settings → Pages.`;
+        }
+      }
+
+      $('#npOpenRepo').href=created.html_url||`https://github.com/${cfg.owner}/${cfg.repo}`;
+      $('#npOpenPages').href=pagesUrl;
+      $('#npOpenPages').style.display=cfg.enablePages?'inline-flex':'none';
+      $('#newProjectResult').hidden=false;
+      const status=pagesWarning ? `Đã tạo repo mới. ${pagesWarning}` : 'Hoàn tất. Repo mới đã có project trống và GitHub Pages đang được deploy (có thể mất 1–2 phút).';
+      newProjectStatus(status,pagesWarning?'working':'ok');
+      showToast('Đã tạo project repo mới');
+      return initResult;
+    }catch(err){
+      let hint='';
+      if(err.status===403||err.status===404) hint=' Kiểm tra token: Repository access nên là All repositories; Permissions cần Administration: Read and write, Contents: Read and write, Pages: Read and write.';
+      newProjectStatus('Không tạo được project: '+err.message+hint,'error');
+    }finally{githubBusy=false;$('#npCreateBtn').disabled=false;}
+  }
+  function newProject(){ openNewProjectModal(); }
 
 
   // ---------- GitHub sync ----------
@@ -331,7 +472,12 @@
   function getGitHubConfig(){
     const defaults=inferGitHubDefaults();
     try{
-      const saved=JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)||'{}');
+      let raw=localStorage.getItem(GITHUB_CONFIG_KEY);
+      if(!raw && canMigrateLegacyStorage()){
+        raw=localStorage.getItem(BASE_GITHUB_CONFIG_KEY);
+        if(raw) localStorage.setItem(GITHUB_CONFIG_KEY,raw);
+      }
+      const saved=JSON.parse(raw||'{}');
       return {...defaults,...saved};
     }catch(e){ return defaults; }
   }
@@ -443,6 +589,13 @@
     }finally{ githubBusy=false; $('#githubLoadBtn').disabled=false; }
   }
   function initGitHubSync(){
+    $('#newProjectModalClose')?.addEventListener('click',closeNewProjectModal);
+    $('#newProjectCancelBtn')?.addEventListener('click',closeNewProjectModal);
+    $('#newProjectModal')?.addEventListener('click',e=>{if(e.target.id==='newProjectModal') closeNewProjectModal();});
+    $('#npCreateBtn')?.addEventListener('click',createNewProjectRepo);
+    let repoNameTouched=false;
+    $('#npRepoName')?.addEventListener('input',()=>{repoNameTouched=true;});
+    $('#npProjectName')?.addEventListener('input',e=>{if(!repoNameTouched) $('#npRepoName').value=repoSlug(e.target.value.replace(/competitor analysis/ig,'analysis'));});
     $('#githubConnectBtn')?.addEventListener('click',openGitHubModal);
     $('#githubModalClose')?.addEventListener('click',closeGitHubModal);
     $('#githubModal')?.addEventListener('click',e=>{if(e.target.id==='githubModal') closeGitHubModal();});
