@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "projectName": "Cooking Order Puzzle — Competitor Analysis",
   "originalIdea": {
     "workingTitle": "Original prototype — Cooking Order Puzzle",
@@ -33,39 +33,48 @@
       "factors": {
         "coreMechanic": {
           "score": 4,
-          "analysis": "Cùng logic order-driven ingredient search. Original dùng grid/tile rõ ràng; Happy Restaurant dùng 3D clutter/visual search. Điểm đáng học là mỗi thao tác tìm item đều gắn trực tiếp với mục tiêu hoàn thành món, nên gameplay không bị gượng."
+          "analysis": "Cùng logic order-driven ingredient search. Original dùng grid/tile rõ ràng; Happy Restaurant dùng 3D clutter/visual search. Điểm đáng học là mỗi thao tác tìm item đều gắn trực tiếp với mục tiêu hoàn thành món, nên gameplay không bị gượng.",
+          "learningScore": 4
         },
         "coreLoop": {
           "score": 5,
-          "analysis": "Cùng flow Order → xác định nguyên liệu → tìm/chọn trên board → hoàn thành món → serve/next customer → clear level. Happy Restaurant còn để reward từ core level cộng tiến độ cho nhiều Meta/Event, giúp một lần chơi phục vụ nhiều mục tiêu."
+          "analysis": "Cùng flow Order → xác định nguyên liệu → tìm/chọn trên board → hoàn thành món → serve/next customer → clear level. Happy Restaurant còn để reward từ core level cộng tiến độ cho nhiều Meta/Event, giúp một lần chơi phục vụ nhiều mục tiêu.",
+          "learningScore": 5
         },
         "metaProgression": {
-          "score": null,
-          "analysis": "Happy Restaurant có 7-Day Login, Balloon Rise, Dream Carnival (Merge), Mole Race và Piggy Bank. Mỗi feature tạo một lý do quay lại khác nhau: nhận thưởng, giữ streak, chơi mode phụ, cạnh tranh hoặc tích lũy value. Original hiện chưa có đủ dữ liệu Meta để chấm mức độ giống."
+          "score": 1,
+          "analysis": "Happy Restaurant có 7-Day Login, Balloon Rise, Dream Carnival (Merge), Mole Race và Piggy Bank. Mỗi feature tạo một lý do quay lại khác nhau: nhận thưởng, giữ streak, chơi mode phụ, cạnh tranh hoặc tích lũy value. Original hiện chưa có đủ dữ liệu Meta để chấm mức độ giống.",
+          "learningScore": 5
         },
         "audienceTheme": {
           "score": 5,
-          "analysis": "Cùng casual puzzle + cooking/restaurant fantasy. Customer order món → player tìm nguyên liệu → hoàn thành món, nên mục tiêu puzzle matching tự nhiên với nhu cầu của dòng cooking/time-management."
+          "analysis": "Cùng casual puzzle + cooking/restaurant fantasy. Customer order món → player tìm nguyên liệu → hoàn thành món, nên mục tiêu puzzle matching tự nhiên với nhu cầu của dòng cooking/time-management.",
+          "learningScore": 4
         },
         "usp": {
           "score": 4,
-          "analysis": "Điểm mạnh không chỉ là mechanic tìm item mà là cách nối Order → Find ingredients → Complete/Serve thành một flow hoàn chỉnh. Order phía trên giải thích vì sao player phải tìm item; thao tác tìm nguyên liệu không bị gượng. Happy Restaurant có cảm giác hoàn chỉnh hơn nhờ feedback và payoff khi complete/serve rõ hơn."
+          "analysis": "Điểm mạnh không chỉ là mechanic tìm item mà là cách nối Order → Find ingredients → Complete/Serve thành một flow hoàn chỉnh. Order phía trên giải thích vì sao player phải tìm item; thao tác tìm nguyên liệu không bị gượng. Happy Restaurant có cảm giác hoàn chỉnh hơn nhờ feedback và payoff khi complete/serve rõ hơn.",
+          "learningScore": 5
         },
         "creatives": {
           "score": 4,
-          "analysis": "Hai top creative đều đánh mạnh vào cooking/time-management fantasy hơn là object-search thuần. Creative 01 (Japanese Greengrocer): customer → order → scan quầy nhiều item → tìm đúng → clear dần → fail. Creative 02 (Sandwich Store): customer → order → tìm food/drink trên shelf → fulfill → khách tiếp theo → fail. Điểm nên học: bán cảm giác phục vụ order để video dễ hiểu ngay."
+          "analysis": "Hai top creative đều đánh mạnh vào cooking/time-management fantasy hơn là object-search thuần. Creative 01 (Japanese Greengrocer): customer → order → scan quầy nhiều item → tìm đúng → clear dần → fail. Creative 02 (Sandwich Store): customer → order → tìm food/drink trên shelf → fulfill → khách tiếp theo → fail. Điểm nên học: bán cảm giác phục vụ order để video dễ hiểu ngay.",
+          "learningScore": 5
         },
         "store": {
-          "score": null,
-          "analysis": "Chưa có đủ store asset để chấm similarity. Cần check icon, screenshot và title đang bán cooking/restaurant, visual search hay puzzle challenge."
+          "score": 1,
+          "analysis": "Chưa có đủ store asset để chấm similarity. Cần check icon, screenshot và title đang bán cooking/restaurant, visual search hay puzzle challenge.",
+          "learningScore": 3
         },
         "monetization": {
-          "score": null,
-          "analysis": "Hybrid IAA + IAP. Interstitial bắt đầu khoảng Level 15; sau đó gần như clear 1 level = 1 interstitial. Rewarded Ads gắn với độ khó; placement nổi bật là thêm khách hàng, cap 5 lần/ngày. IAP có Dream Pass, Event Pack, bundle, tiered pack, BOGO, Piggy Bank và gói gem/booster/life/event currency. Original chưa có đủ dữ liệu monet để chấm mức độ giống."
+          "score": 1,
+          "analysis": "Hybrid IAA + IAP. Interstitial bắt đầu khoảng Level 15; sau đó gần như clear 1 level = 1 interstitial. Rewarded Ads gắn với độ khó; placement nổi bật là thêm khách hàng, cap 5 lần/ngày. IAP có Dream Pass, Event Pack, bundle, tiered pack, BOGO, Piggy Bank và gói gem/booster/life/event currency. Original chưa có đủ dữ liệu monet để chấm mức độ giống.",
+          "learningScore": 4
         },
         "balance": {
-          "score": null,
-          "analysis": "Game bắt đầu khó rõ từ khoảng Level 20, chia Normal / Hard / Super Hard. Hard thường cần retry; Super Hard tăng nhu cầu booster/RV/IAP. Độ khó nối với Economy + LiveOps: level khó → cần thêm resource → nhận reward từ Event/Meta hoặc ads/IAP → quay lại vượt level. Original chưa có đủ dữ liệu balance để chấm mức độ giống."
+          "score": 1,
+          "analysis": "Game bắt đầu khó rõ từ khoảng Level 20, chia Normal / Hard / Super Hard. Hard thường cần retry; Super Hard tăng nhu cầu booster/RV/IAP. Độ khó nối với Economy + LiveOps: level khó → cần thêm resource → nhận reward từ Event/Meta hoặc ads/IAP → quay lại vượt level. Original chưa có đủ dữ liệu balance để chấm mức độ giống.",
+          "learningScore": 4
         },
         "traction": {
           "score": 5,
@@ -79,6 +88,10 @@
         "risk": "Board grid/tile dễ đọc nhưng có thể tạo cảm giác giống puzzle thông thường nếu phần order, serve và feedback chưa đủ nổi bật. Khi đó người chơi có thể không cảm nhận rõ đây là một cooking/service game.",
         "conclusion": "Happy Restaurant 3D là direct competitor ở core loop, audience và cooking flow. Nên dùng làm tham khảo cho cách nối gameplay với theme cooking, cảm giác chơi, Meta/Event và monetization; original vẫn nên giữ lợi thế board/grid rõ ràng và cách thể hiện riêng.",
         "sources": "Nguồn user cung cấp: original gameplay video (Lv1–3); Happy Restaurant gameplay video; ảnh LiveOps/IAP/ads; 2 top creative videos; ảnh market data. Các phần Meta/Store/Monet/Balance của original chưa có đủ dữ liệu nên chưa chấm mức độ giống."
+      },
+      "marketProof": {
+        "score": 5,
+        "analysis": "Dữ liệu user cung cấp cho thấy market signal mạnh: khoảng $1.09M revenue/30 ngày, 486,067 downloads/30 ngày; RPD all-time $1.32 Global và $3.6 Tier-1 West. Đủ mạnh để dùng làm mốc tham khảo về thị trường."
       }
     }
   ],
