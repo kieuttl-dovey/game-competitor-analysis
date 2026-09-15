@@ -23,8 +23,7 @@
     {key:'creatives', label:'Top Creatives / UA Angle', weight:.15, question:'Creative tốt nhất đang bán điểm gì: gameplay, cooking, fail/win, satisfying hay thử thách?'},
     {key:'store', label:'Store Positioning', weight:.05, question:'Icon, screenshot và thông điệp trên store đang bán điều gì? Có gần idea gốc không?'},
     {key:'monetization', label:'Monetization', weight:.10, question:'Game kiếm tiền bằng ads/IAP như thế nào? Vị trí ads, gói bán và giá có gì đáng học?'},
-    {key:'balance', label:'Balance / Economy & Difficulty', weight:.05, question:'Game tăng độ khó ra sao? Reward, resource và monet có liên kết với độ khó như thế nào?'},
-    {key:'traction', label:'Market Scale / Traction', weight:.05, question:'Game có đủ download, revenue, ranking hoặc creative scale để làm mốc tham khảo không?'}
+    {key:'balance', label:'Balance / Economy & Difficulty', weight:.10, question:'Game tăng độ khó ra sao? Reward, resource và monet có liên kết với độ khó như thế nào?'}
   ];
 
   const ORIGINAL_FIELDS = [
@@ -34,7 +33,7 @@
     ['uspHook','USP / Hook dự kiến'], ['monetExpected','Monet dự kiến']
   ];
 
-  let state = loadState();
+  let state = migrateState(loadState());
   let route = {view:'idea', competitorId:null};
   let saveTimer = null;
   let githubLastSha = null;
@@ -45,6 +44,28 @@
   const esc = (v='') => String(v ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
 
   function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function migrateState(input){
+    const x=input && typeof input==='object' ? input : clone(window.DEFAULT_PROJECT);
+    x.version=2;
+    if(!Array.isArray(x.competitors)) x.competitors=[];
+    x.competitors.forEach((c,i)=>{
+      if(!c.factors) c.factors={};
+      FACTORS.forEach(f=>{
+        if(!c.factors[f.key]) c.factors[f.key]={score:null,learningScore:null,analysis:''};
+        if(c.factors[f.key].learningScore===undefined) c.factors[f.key].learningScore=null;
+        if(c.factors[f.key].analysis===undefined) c.factors[f.key].analysis='';
+      });
+      if(!c.marketProof){
+        const old=c.factors?.traction || {};
+        c.marketProof={score:old.score ?? null, analysis:old.analysis || ''};
+      } else {
+        if(c.marketProof.score===undefined) c.marketProof.score=null;
+        if(c.marketProof.analysis===undefined) c.marketProof.analysis='';
+      }
+      if(!c.learning) c.learning={learn:'',avoid:'',impact:'',risk:'',conclusion:'',sources:''};
+    });
+    return x;
+  }
   function canMigrateLegacyStorage(){
     if(!(location.hostname||'').endsWith('.github.io')) return true;
     try{
@@ -75,11 +96,11 @@
   }
   function uid(){ return 'comp-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
   function blankCompetitor(index){
-    const factors={}; FACTORS.forEach(f=>factors[f.key]={score:null,analysis:''});
+    const factors={}; FACTORS.forEach(f=>factors[f.key]={score:null,learningScore:null,analysis:''});
     return {
       id:uid(), name:`Competitor ${String(index).padStart(2,'0')}`,
       identification:{storeLink:'',platform:'',publisher:'',genre:'',marketSignal:'',sourceEvidence:'',marketFocus:'',lastChecked:new Date().toISOString().slice(0,10)},
-      why:{reason:'',similarity:'',difference:''}, factors,
+      why:{reason:'',similarity:'',difference:''}, factors, marketProof:{score:null,analysis:''},
       learning:{learn:'',avoid:'',impact:'',risk:'',conclusion:'',sources:''}
     };
   }
@@ -91,7 +112,7 @@
     fresh.ideaAdjustment.rows.forEach(r=>{r.competitorsDoing='';r.suggestion='';r.references='';r.rationale='';r.action='KEEP';r.priority='P1';if(r.current)r.current='';});
     fresh.ideaAdjustment.topChanges.forEach(r=>Object.keys(r).forEach(k=>r[k]=k==='priority'?'P1':k==='action'?'ADD':''));
     fresh.ideaAdjustment.final={summary:'',keep:'',add:'',change:'',remove:'',reference:'',call:'ITERATE IDEA',nextTest:''};
-    return fresh;
+    return migrateState(fresh);
   }
   function getComp(){ return state.competitors.find(c=>c.id===route.competitorId); }
   function getByPath(obj, path){ return path.split('.').reduce((a,k)=>a?.[k],obj); }
@@ -101,25 +122,32 @@
     cur[keys.at(-1)] = value;
   }
   function calc(comp){
-    let sum=0, answeredWeight=0, count=0;
+    let fitSum=0, fitWeight=0, fitCount=0;
+    let learningSum=0, learningCount=0, highLearning=0;
     FACTORS.forEach(f=>{
-      const raw=comp.factors?.[f.key]?.score;
-      const score=(raw===null||raw===''||raw===undefined)?null:Number(raw);
-      if(score!=null && !Number.isNaN(score)) {sum += f.weight*score; answeredWeight += f.weight; count++;}
+      const item=comp.factors?.[f.key]||{};
+      const fitRaw=item.score;
+      const fit=(fitRaw===null||fitRaw===''||fitRaw===undefined)?null:Number(fitRaw);
+      if(fit!=null && !Number.isNaN(fit)) {fitSum += f.weight*fit; fitWeight += f.weight; fitCount++;}
+      const learnRaw=item.learningScore;
+      const learn=(learnRaw===null||learnRaw===''||learnRaw===undefined)?null:Number(learnRaw);
+      if(learn!=null && !Number.isNaN(learn)) {learningSum += learn; learningCount++; if(learn>=4) highLearning++;}
     });
-    const provisional = answeredWeight ? sum/(answeredWeight*5) : null;
-    const official = count===FACTORS.length ? sum/5 : null;
-    let type='Chưa đủ điểm';
-    if(official!=null){
-      const cm=Number(comp.factors.coreMechanic.score), cl=Number(comp.factors.coreLoop.score), at=Number(comp.factors.audienceTheme.score);
-      if(cm>=4 && cl>=4 && at>=4 && official>=.75) type='Direct';
-      else if(official>=.60) type='Adjacent';
-      else if(official>=.45) type='Benchmark';
+    const fit = fitWeight ? fitSum/(fitWeight*5) : null;
+    const learning = learningCount ? learningSum/learningCount : null;
+    const marketRaw=comp.marketProof?.score;
+    const marketProof=(marketRaw===null||marketRaw===''||marketRaw===undefined)?null:Number(marketRaw);
+    let type='Chưa đủ dữ liệu';
+    const cm=Number(comp.factors?.coreMechanic?.score), cl=Number(comp.factors?.coreLoop?.score), at=Number(comp.factors?.audienceTheme?.score);
+    if(fitCount>=6 && !Number.isNaN(cm) && !Number.isNaN(cl) && !Number.isNaN(at)){
+      if(cm>=4 && cl>=4 && at>=4 && fit>=.75) type='Direct';
+      else if(fit>=.60) type='Adjacent';
+      else if(learning!=null && learning>=3.5) type='Benchmark';
       else type='Not relevant';
     }
-    return {sum,answeredWeight,count,provisional,official,type};
+    return {fitSum,fitWeight,fitCount,fit,learning,learningCount,highLearning,marketProof,type};
   }
-  function typeClass(type){ return type.toLowerCase().replaceAll(' ','-'); }
+  function typeClass(type){ const t=String(type||'').toLowerCase(); if(t.includes('chưa đủ')) return 'not-relevant'; return t.replaceAll(' ','-'); }
   function pillAction(v){ return `<span class="pill ${esc(String(v).toLowerCase())}">${esc(v)}</span>`; }
 
   function render(){
@@ -148,21 +176,32 @@
       <tr><td>6. Kết luận cuối</td><td>Chốt idea nên giữ, iterate, pivot hay drop và nói rõ bước test tiếp.</td></tr>
       </tbody></table><div class="guide-rule"><b>Nguyên tắc:</b> Mỗi đề xuất cần có game / dữ liệu làm căn cứ. Thiếu dữ liệu thì ghi rõ, không suy đoán.</div>`;
     } else {
-      gp.innerHTML=`<h3 class="guide-title">HƯỚNG DẪN ĐIỀN TAB</h3><p class="guide-sub">Mục 3 là phần chính. Mục 4 chỉ chốt game này ảnh hưởng gì tới idea gốc.</p>
+      gp.innerHTML=`<h3 class="guide-title">HƯỚNG DẪN ĐIỀN TAB</h3><p class="guide-sub">Mục 3 tách 3 câu hỏi khác nhau: giống idea bao nhiêu, đáng học bao nhiêu và market đã chứng minh mạnh đến đâu.</p>
       <table class="guide-table"><thead><tr><th>Mục</th><th>Nên điền gì?</th></tr></thead><tbody>
       <tr><td>1. Thông tin game</td><td>Xác định đúng game, publisher, platform và nguồn dữ liệu.</td></tr>
       <tr><td>2. Vì sao là competitor</td><td>Nêu ngắn gọn điểm giống/khác quan trọng so với idea gốc.</td></tr>
-      <tr><td>3. Fit Score + Phân tích</td><td>Chấm độ giống và giải thích game đang thiết kế yếu tố đó như thế nào. Viết rõ, tránh jargon.</td></tr>
+      <tr><td>3A. Fit Score</td><td>Chấm mức độ giống với Original Idea. Dùng để xác định Direct / Adjacent.</td></tr>
+      <tr><td>3B. Learning Value</td><td>Chấm mức độ game gốc nên học yếu tố này, kể cả khi Fit thấp.</td></tr>
+      <tr><td>3C. Market Proof</td><td>Chấm độ mạnh của market bằng revenue, download, RPD, ranking, creative scale.</td></tr>
       <tr><td>4. Kết luận</td><td>Chốt điểm nên học, không nên copy, idea cần đổi và rủi ro.</td></tr>
       </tbody></table>
+      <div class="guide-score-title">FIT SCORE · 1–5</div>
       <div class="score-guide">
-        <div class="score-row"><span class="score-badge">1</span><span>Rất khác idea gốc; chỉ tham khảo feature riêng lẻ.</span></div>
-        <div class="score-row"><span class="score-badge">2</span><span>Có một số điểm giống nhưng direction chính khác.</span></div>
-        <div class="score-row"><span class="score-badge">3</span><span>Overlap vừa; benchmark được nhưng cần adapt nhiều.</span></div>
-        <div class="score-row"><span class="score-badge">4</span><span>Rất gần idea; cùng direction chính, khác execution.</span></div>
-        <div class="score-row"><span class="score-badge">5</span><span>Gần như cùng direction; có thể xem là direct competitor.</span></div>
+        <div class="score-row"><span class="score-badge">1</span><span>Rất khác Original Idea.</span></div>
+        <div class="score-row"><span class="score-badge">2</span><span>Có vài điểm giống nhưng hướng chính khác.</span></div>
+        <div class="score-row"><span class="score-badge">3</span><span>Giống một phần.</span></div>
+        <div class="score-row"><span class="score-badge">4</span><span>Rất gần idea, khác chủ yếu ở cách triển khai.</span></div>
+        <div class="score-row"><span class="score-badge">5</span><span>Gần như cùng hướng / direct competitor.</span></div>
       </div>
-      <div class="guide-rule"><b>Lưu ý:</b> Score đo mức độ fit với Original Idea, không phải game tốt/xấu. Riêng Market Scale / Traction đo độ mạnh của market proof.</div>`;
+      <div class="guide-score-title">LEARNING VALUE · 1–5</div>
+      <div class="score-guide">
+        <div class="score-row"><span class="score-badge learning">1</span><span>Gần như không có gì cần học cho idea gốc.</span></div>
+        <div class="score-row"><span class="score-badge learning">2</span><span>Có một vài chi tiết có thể tham khảo.</span></div>
+        <div class="score-row"><span class="score-badge learning">3</span><span>Có insight hữu ích, cần chọn lọc khi áp dụng.</span></div>
+        <div class="score-row"><span class="score-badge learning">4</span><span>Đáng học, có thể áp dụng rõ vào idea gốc.</span></div>
+        <div class="score-row"><span class="score-badge learning">5</span><span>Reference ưu tiên cho yếu tố này.</span></div>
+      </div>
+      <div class="guide-rule"><b>Ví dụ:</b> Meta có thể Fit 2/5 nhưng Learning 5/5 nếu Original chưa có Meta và game này có hệ thống đáng học. Market Proof chấm riêng, không cộng vào Fit.</div>`;
     }
   }
 
@@ -176,11 +215,11 @@
     renderGuide('idea');
     const ia=state.ideaAdjustment || (state.ideaAdjustment={rows:[],topChanges:[],final:{}});
     const evidence=state.competitors.map((c,i)=>{
-      const s=calc(c); const fit=s.official!=null?`${Math.round(s.official*100)}%`:`${s.count}/10 đã chấm`;
+      const s=calc(c); const fit=s.fit!=null?`${Math.round(s.fit*100)}%`:'—'; const learning=s.learning!=null?`${s.learning.toFixed(1)}/5`:'—'; const market=s.marketProof!=null?`${s.marketProof}/5`:'—';
       return `<div class="evidence-card">
         <div class="evidence-card-head">
           <div class="evidence-card-title"><span class="evidence-index">${String(i+1).padStart(2,'0')}</span><button class="link-btn" data-open-comp="${esc(c.id)}">${esc(c.name)}</button></div>
-          <div class="evidence-card-meta">${s.official!=null?`<span class="pill ${typeClass(s.type)}">${esc(s.type)}</span>`:'<span class="pill not-relevant">Chưa đủ điểm</span>'}<span class="pill adjacent mono">Fit ${esc(fit)}</span></div>
+          <div class="evidence-card-meta"><span class="pill ${typeClass(s.type)}">${esc(s.type)}</span><span class="pill adjacent mono">Fit ${esc(fit)}</span><span class="pill learning mono">Learning ${esc(learning)}</span><span class="pill market mono">Market ${esc(market)}</span></div>
         </div>
         <div class="evidence-card-body">
           <div class="evidence-block"><strong>Điểm nên học</strong><p>${esc(c.learning?.learn||'Chưa điền')}</p></div>
@@ -250,14 +289,24 @@
     renderGuide('competitor');
     const s=calc(comp);
     const rows=FACTORS.map(f=>{
-      const v=comp.factors[f.key]||{score:null,analysis:''};
+      const v=comp.factors[f.key]||{score:null,learningScore:null,analysis:''};
       const weighted=(v.score===null||v.score==='')?'':(f.weight*Number(v.score)).toFixed(2);
-      return `<tr><td class="factor">${esc(f.label)}</td><td class="weight">${Math.round(f.weight*100)}%</td><td class="score"><select class="cell-select" data-bind="factors.${f.key}.score"><option value="">—</option>${[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(v.score)===x?'selected':''}>${x}</option>`).join('')}</select></td><td class="weight mono">${esc(weighted)}</td><td class="question">${esc(f.question)}</td><td class="analysis"><textarea class="cell-textarea" data-bind="factors.${f.key}.analysis">${esc(v.analysis)}</textarea></td></tr>`;
+      return `<tr>
+        <td class="factor">${esc(f.label)}</td>
+        <td class="weight">${Math.round(f.weight*100)}%</td>
+        <td class="score"><select class="cell-select fit-select" data-bind="factors.${f.key}.score"><option value="">—</option>${[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(v.score)===x?'selected':''}>${x}</option>`).join('')}</select></td>
+        <td class="score"><select class="cell-select learning-select" data-bind="factors.${f.key}.learningScore"><option value="">—</option>${[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(v.learningScore)===x?'selected':''}>${x}</option>`).join('')}</select></td>
+        <td class="weight mono">${esc(weighted)}</td>
+        <td class="question">${esc(f.question)}</td>
+        <td class="analysis"><textarea class="cell-textarea" data-bind="factors.${f.key}.analysis">${esc(v.analysis)}</textarea></td>
+      </tr>`;
     }).join('');
-    const official=s.official!=null?Math.round(s.official*100)+'%':'—';
-    const provisional=s.provisional!=null?Math.round(s.provisional*100)+'%':'—';
+    const fit=s.fit!=null?Math.round(s.fit*100)+'%':'—';
+    const learning=s.learning!=null?s.learning.toFixed(1)+'/5':'—';
+    const market=s.marketProof!=null?s.marketProof+'/5':'—';
+    const mp=comp.marketProof||{score:null,analysis:''};
     $('#mainContent').innerHTML=`
-      <div class="page-head"><div><h1 class="page-title">${esc(comp.name||'Competitor')}</h1><p class="page-sub">Điền 10 yếu tố ở Mục 3; Mục 4 chỉ chốt những gì nên học và idea gốc cần thay đổi gì.</p></div><div class="page-actions"><button class="btn secondary" id="duplicateCompBtn">Nhân bản tab</button><button class="btn danger" id="deleteCompBtn">Xóa competitor</button></div></div>
+      <div class="page-head"><div><h1 class="page-title">${esc(comp.name||'Competitor')}</h1><p class="page-sub">Fit = mức độ giống Original Idea · Learning = mức độ đáng học · Market Proof = độ mạnh đã được chứng minh trên thị trường.</p></div><div class="page-actions"><button class="btn secondary" id="duplicateCompBtn">Nhân bản tab</button><button class="btn danger" id="deleteCompBtn">Xóa competitor</button></div></div>
 
       <div class="card"><div class="card-head"><h2 class="card-title"><span class="section-number">1</span>COMPETITOR IDENTIFICATION</h2></div><div class="card-body"><div class="form-grid three">
         ${inputField('Game name','name',comp.name||'')}
@@ -277,8 +326,17 @@
         ${inputField('Điểm khác quan trọng nhất','why.difference',comp.why.difference||'',{textarea:true,span2:true,rows:3})}
       </div></div></div>
 
-      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">3</span>COMPETITOR FIT SCORE — 10 YẾU TỐ</h2><div class="card-desc">Điểm đo mức độ fit với Original Idea; Market Scale đo độ mạnh của market proof.</div></div></div><div class="card-body"><div class="table-wrap"><table class="data-table"><thead><tr><th>Yếu tố</th><th>Trọng số</th><th>Score 1–5</th><th>Điểm đóng góp</th><th>Cần xem gì?</th><th>Phân tích / Ý nghĩa</th></tr></thead><tbody>${rows}</tbody></table></div>
-        <div class="score-summary"><div class="metric"><div class="metric-label">Đã chấm</div><div class="metric-value">${s.count}/10</div><div class="metric-note">Cần đủ 10 yếu tố để chốt type</div></div><div class="metric accent"><div class="metric-label">Fit tạm tính</div><div class="metric-value">${provisional}</div><div class="metric-note">Tính trên các yếu tố đã chấm</div></div><div class="metric green"><div class="metric-label">Fit chính thức</div><div class="metric-value">${official}</div><div class="metric-note">Chỉ hiện khi đủ 10/10</div></div><div class="metric orange"><div class="metric-label">Loại competitor</div><div class="metric-value" style="font-size:16px">${esc(s.type)}</div><div class="metric-note">Direct / Adjacent / Benchmark / Not relevant</div></div></div>
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">3</span>FIT & LEARNING SCORE — 9 YẾU TỐ + MARKET PROOF</h2><div class="card-desc">Một yếu tố có thể Fit thấp nhưng Learning cao. Market Proof đứng riêng và không cộng vào Fit.</div></div></div><div class="card-body"><div class="table-wrap"><table class="data-table score-table"><thead><tr><th>Yếu tố</th><th>Trọng số Fit</th><th>Fit 1–5</th><th>Learning 1–5</th><th>Điểm đóng góp</th><th>Cần xem gì?</th><th>Phân tích / Ý nghĩa</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="market-proof-card">
+          <div class="market-proof-head"><div><span class="mini-label">MARKET PROOF</span><h3>Game đã chứng minh demand mạnh đến đâu?</h3></div><select class="cell-select market-select" data-bind="marketProof.score"><option value="">—</option>${[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(mp.score)===x?'selected':''}>${x}</option>`).join('')}</select></div>
+          <div class="market-proof-body"><div class="market-proof-rule"><b>Chấm bằng:</b> Revenue, Downloads, RPD, Ranking, Geo, Creative scale. 1 = proof yếu · 3 = đã có demand · 5 = scale mạnh / reference đáng tin.</div><textarea class="cell-textarea" data-bind="marketProof.analysis" placeholder="Ghi số liệu market và kết luận ngắn...">${esc(mp.analysis||'')}</textarea></div>
+        </div>
+        <div class="score-summary">
+          <div class="metric accent"><div class="metric-label">Fit Score</div><div class="metric-value">${fit}</div><div class="metric-note">Độ giống với Original · ${s.fitCount}/${FACTORS.length} yếu tố đã chấm</div></div>
+          <div class="metric learning-metric"><div class="metric-label">Learning Value</div><div class="metric-value">${learning}</div><div class="metric-note">Mức độ đáng học · ${s.highLearning} yếu tố đạt 4–5</div></div>
+          <div class="metric market-metric"><div class="metric-label">Market Proof</div><div class="metric-value">${market}</div><div class="metric-note">Độ mạnh của market signal</div></div>
+          <div class="metric orange"><div class="metric-label">Loại reference</div><div class="metric-value" style="font-size:16px">${esc(s.type)}</div><div class="metric-note">Direct / Adjacent / Benchmark / Not relevant</div></div>
+        </div>
       </div></div>
 
       <div class="card"><div class="card-head"><h2 class="card-title"><span class="section-number">4</span>KẾT LUẬN & ẢNH HƯỞNG TỚI IDEA GỐC</h2></div><div class="card-body"><div class="learning-grid">
@@ -299,12 +357,12 @@
     const el=e.target;
     if(!el.matches('[data-bind]')) return;
     let value=el.value;
-    if(el.matches('select[data-bind*=".score"]')) value=value===''?null:Number(value);
+    if(el.matches('select[data-bind$=".score"], select[data-bind$=".learningScore"]')) value=value===''?null:Number(value);
     const root=route.view==='competitor'?getComp():state;
     setByPath(root,el.dataset.bind,value);
     if(route.view==='competitor' && el.dataset.bind==='name') renderSidebar();
     saveState();
-    if(route.view==='competitor' && el.dataset.bind.includes('.score')) renderCompetitor(getComp());
+    if(route.view==='competitor' && (el.dataset.bind.endsWith('.score') || el.dataset.bind.endsWith('.learningScore'))) renderCompetitor(getComp());
     if(route.view==='idea' && (el.dataset.bind.endsWith('.action') || el.dataset.bind.endsWith('.priority'))) renderIdea();
   }
 
@@ -334,7 +392,7 @@
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(state.projectName||'game-competitor-analysis').replace(/[^a-z0-9-_]+/gi,'_')+'.json'; a.click(); URL.revokeObjectURL(a.href); showToast('Đã export JSON');
   }
   function importJson(e){
-    const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{try{const x=JSON.parse(reader.result); if(!x.originalIdea||!Array.isArray(x.competitors)) throw new Error('Sai format'); state=x; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render(); showToast('Import thành công');}catch(err){alert('File JSON không đúng format của template.');}}; reader.readAsText(file); e.target.value='';
+    const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{try{const x=JSON.parse(reader.result); if(!x.originalIdea||!Array.isArray(x.competitors)) throw new Error('Sai format'); state=migrateState(x); localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render(); showToast('Import thành công');}catch(err){alert('File JSON không đúng format của template.');}}; reader.readAsText(file); e.target.value='';
   }
   function repoSlug(value){
     return String(value||'')
@@ -580,7 +638,7 @@
       if(!remote?.content) throw new Error('Không tìm thấy nội dung file dữ liệu.');
       const incoming=JSON.parse(base64ToUtf8(remote.content));
       if(!incoming.originalIdea||!Array.isArray(incoming.competitors)) throw new Error('File GitHub không đúng format của template.');
-      state=incoming; githubLastSha=remote.sha||null; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render();
+      state=migrateState(incoming); githubLastSha=remote.sha||null; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render();
       if(!silent) showToast('Đã load dữ liệu từ GitHub');
       return true;
     }catch(err){

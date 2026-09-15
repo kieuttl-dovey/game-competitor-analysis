@@ -157,3 +157,22 @@ h1,h2,h3,h4,.brand-title,.project-name,.card-title,.metric-value,.nav-label{font
 .new-project-result{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fbfdff}
 .new-project-result[hidden]{display:none!important}
 .new-project-result .btn{display:inline-flex;align-items:center;text-decoration:none}
+
+/* V5 scoring: Fit + Learning Value + Market Proof */
+.score-table{min-width:1180px}
+.fit-select{border-color:#c8d9ff;background:#f7faff}
+.learning-select{border-color:#c8eee9;background:#f4fcfa}
+.market-select{min-width:82px;border-color:#d7d5ff;background:#f8f7ff;font-weight:700}
+.guide-score-title{margin-top:15px;margin-bottom:6px;font:700 10px/1.2 "Space Grotesk","Roboto",sans-serif;letter-spacing:.06em;color:var(--ink)}
+.score-badge.learning{background:#e5f7f3;color:#087f6b}
+.market-proof-card{margin-top:14px;border:1px solid #d9d8f7;background:#faf9ff;border-radius:14px;overflow:hidden}
+.market-proof-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-bottom:1px solid #e5e3fb;background:#f5f3ff}
+.market-proof-head h3{margin:3px 0 0;font-size:14px;color:var(--ink)}
+.market-proof-body{display:grid;grid-template-columns:minmax(240px,.7fr) minmax(360px,1.3fr);gap:12px;padding:12px 14px}
+.market-proof-rule{font-size:11px;line-height:1.55;color:var(--muted);padding:10px 11px;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.market-proof-body textarea{min-height:84px}
+.metric.learning-metric{background:#effaf7;border-color:#ccefe5}
+.metric.market-metric{background:#f3f2ff;border-color:#dcdaff}
+.pill.learning{background:#e8f8f4;color:#087f6b}
+.pill.market{background:#efedff;color:#514eb9}
+@media (max-width:900px){.market-proof-body{grid-template-columns:1fr}.score-table{min-width:1050px}}
