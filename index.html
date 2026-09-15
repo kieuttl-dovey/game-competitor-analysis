@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Game Competitor Analysis</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">G</div>
+      <div>
+        <div class="brand-title">Game Competitor Analysis</div>
+        <div class="brand-sub">Competitor → Learning → Idea Adjustment</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost" id="newProjectBtn">Project mới</button>
+      <button class="btn ghost" id="githubConnectBtn">GitHub</button>
+      <button class="btn ghost" id="githubLoadBtn">Load GitHub</button>
+      <button class="btn primary" id="githubSaveBtn">Save GitHub</button>
+      <button class="btn ghost" id="importBtn">Import JSON</button>
+      <button class="btn ghost" id="exportBtn">Export JSON</button>
+      <button class="btn ghost" id="printBtn">Print / PDF</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden />
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="eyebrow">PROJECT</span>
+        <input id="projectNameInput" class="project-name" aria-label="Project name" />
+      </div>
+      <nav id="sidebarNav" class="nav-list"></nav>
+      <div class="sidebar-actions">
+        <button class="btn primary wide" id="addCompetitorBtn">+ Thêm competitor</button>
+        <div class="small-note">Dữ liệu tự lưu trên trình duyệt. Bấm Save GitHub để commit data/project.json và chia sẻ cho team.</div>
+      </div>
+    </aside>
+
+    <main id="mainContent" class="main-content"></main>
+    <aside id="guidePanel" class="guide-panel"></aside>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="githubModal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="githubModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="githubModalTitle">Kết nối GitHub</h2>
+          <p>Lưu dữ liệu phân tích trực tiếp vào repo bằng GitHub Contents API.</p>
+        </div>
+        <button class="icon-btn" id="githubModalClose" aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid two">
+          <div class="field"><label>Owner / Organization</label><input id="ghOwner" placeholder="your-github-username" /></div>
+          <div class="field"><label>Repository</label><input id="ghRepo" placeholder="game-competitor-analysis" /></div>
+          <div class="field"><label>Branch</label><input id="ghBranch" value="main" /></div>
+          <div class="field"><label>Data file path</label><input id="ghPath" value="data/project.json" /></div>
+          <div class="field span-2"><label>Fine-grained Personal Access Token</label><input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_..." /></div>
+        </div>
+        <label class="check-row"><input id="ghAutoLoad" type="checkbox" checked /> Tự load dữ liệu từ GitHub khi mở website</label>
+        <div class="security-note">
+          <b>Bảo mật:</b> tạo <b>fine-grained token</b> chỉ cho đúng repo này, quyền <b>Contents: Read and write</b>. Token chỉ được giữ trong <b>sessionStorage</b> của tab trình duyệt, không ghi vào repo hay JSON export.
+        </div>
+        <div id="ghStatus" class="github-status">Chưa kiểm tra kết nối.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="ghTestBtn">Test connection</button>
+        <button class="btn primary" id="ghSaveConfigBtn">Lưu cấu hình</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sample-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

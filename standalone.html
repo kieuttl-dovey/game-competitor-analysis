@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Game Competitor Analysis</title>
+  <style>
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --ink:#172033;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --line-strong:#d1d5db;
+  --nav:#111827;
+  --nav-soft:#1f2937;
+  --accent:#2563eb;
+  --accent-soft:#eff6ff;
+  --green:#0f766e;
+  --green-soft:#ecfdf5;
+  --orange:#c2410c;
+  --orange-soft:#fff7ed;
+  --red:#b91c1c;
+  --red-soft:#fef2f2;
+  --purple:#7c3aed;
+  --purple-soft:#f5f3ff;
+  --shadow:0 10px 30px rgba(17,24,39,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;line-height:1.45}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.topbar{height:68px;background:var(--nav);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20;box-shadow:0 1px 0 rgba(255,255,255,.08)}
+.brand{display:flex;align-items:center;gap:11px}.brand-mark{width:36px;height:36px;border-radius:10px;background:#fff;color:var(--nav);display:grid;place-items:center;font-weight:800}.brand-title{font-weight:800;font-size:15px}.brand-sub{font-size:11px;color:#9ca3af;margin-top:1px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid transparent;border-radius:9px;padding:8px 12px;font-weight:700;font-size:12px;background:#fff;color:var(--ink)}.btn.ghost{background:transparent;color:#e5e7eb;border-color:#374151}.btn.ghost:hover{background:#1f2937}.btn.primary{background:var(--accent);color:#fff}.btn.danger{background:#fff;color:var(--red);border-color:#fecaca}.btn.secondary{background:#fff;color:var(--ink);border-color:var(--line-strong)}.btn.wide{width:100%}
+.app-shell{display:grid;grid-template-columns:235px minmax(0,1fr) 315px;min-height:calc(100vh - 68px)}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;position:sticky;top:68px;height:calc(100vh - 68px);overflow:auto}.sidebar-head{padding:0 6px 12px}.eyebrow{display:block;font-size:10px;letter-spacing:.12em;color:#9ca3af;font-weight:800;margin-bottom:5px}.project-name{width:100%;border:0;border-bottom:1px solid transparent;padding:3px 0;font-size:15px;font-weight:800;color:var(--ink);background:transparent}.project-name:focus{outline:0;border-bottom-color:var(--accent)}
+.nav-list{display:flex;flex-direction:column;gap:5px}.nav-item{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:#4b5563;padding:9px 10px;border-radius:9px;text-align:left;font-weight:650}.nav-item:hover{background:#f3f4f6}.nav-item.active{background:var(--accent-soft);color:#1d4ed8}.nav-num{display:inline-grid;place-items:center;min-width:24px;height:24px;border-radius:7px;background:#f3f4f6;font-size:11px;font-weight:800}.nav-item.active .nav-num{background:#dbeafe}.nav-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sidebar-actions{margin-top:auto;padding-top:16px}.small-note{font-size:11px;color:#9ca3af;margin-top:9px;line-height:1.4}
+.main-content{padding:24px 28px 60px;min-width:0}.guide-panel{background:#fbfcfe;border-left:1px solid var(--line);padding:24px 18px;position:sticky;top:68px;height:calc(100vh - 68px);overflow:auto}
+.page-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.page-title{font-size:24px;line-height:1.2;margin:0 0 6px;font-weight:850}.page-sub{color:var(--muted);margin:0;max-width:850px}.page-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}.card-head{padding:14px 16px;background:#fafafa;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.card-title{font-size:14px;font-weight:850;margin:0}.card-desc{font-size:12px;color:var(--muted);margin-top:2px}.card-body{padding:16px}
+.section-number{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:8px;background:var(--nav);color:#fff;margin-right:8px;font-size:11px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.field{display:flex;flex-direction:column;gap:5px}.field.span2{grid-column:span 2}.field label{font-size:11px;font-weight:800;color:#4b5563}.field input,.field textarea,.field select,.cell-input,.cell-textarea,.cell-select{width:100%;border:1px solid var(--line-strong);border-radius:8px;background:#fff;padding:8px 9px;color:var(--ink);outline:0}.field textarea,.cell-textarea{resize:vertical;min-height:72px;line-height:1.45}.field input:focus,.field textarea:focus,.field select:focus,.cell-input:focus,.cell-textarea:focus,.cell-select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}.data-table{border-collapse:collapse;width:100%;min-width:900px;background:#fff}.data-table th{position:sticky;top:0;background:#f8fafc;color:#374151;text-align:left;font-size:11px;font-weight:850;padding:9px 10px;border-bottom:1px solid var(--line-strong);vertical-align:bottom}.data-table td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}.data-table tr:last-child td{border-bottom:0}.data-table .factor{font-weight:800;min-width:180px}.data-table .weight{white-space:nowrap;text-align:center}.data-table .score{width:76px}.data-table .question{min-width:220px;color:#4b5563;font-size:12px}.data-table .analysis{min-width:430px}.data-table textarea{min-height:105px}.data-table select{min-width:64px}
+.score-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 0}.metric{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fafafa}.metric-label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}.metric-value{font-size:20px;font-weight:850;margin-top:3px}.metric-note{font-size:11px;color:var(--muted);margin-top:2px}.metric.accent{background:var(--accent-soft);border-color:#bfdbfe}.metric.green{background:var(--green-soft);border-color:#a7f3d0}.metric.orange{background:var(--orange-soft);border-color:#fed7aa}
+.learning-grid{display:grid;grid-template-columns:180px minmax(0,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden}.learning-label{padding:11px 12px;background:#f8fafc;border-bottom:1px solid var(--line);font-weight:800}.learning-value{padding:7px 8px;border-bottom:1px solid var(--line)}.learning-grid>*:nth-last-child(-n+2){border-bottom:0}.learning-value textarea{min-height:76px}
+.guide-title{font-size:14px;font-weight:850;margin:0 0 4px}.guide-sub{font-size:12px;color:var(--muted);margin:0 0 14px}.guide-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}.guide-table th,.guide-table td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}.guide-table th{background:#f3f4f6;font-size:11px}.guide-table td{font-size:11px}.guide-table tr:last-child td{border-bottom:0}.guide-rule{margin-top:14px;padding:11px;border-radius:9px;background:#fffbeb;border:1px solid #fde68a;font-size:11px;color:#78350f}.score-guide{display:grid;gap:6px;margin-top:14px}.score-row{display:grid;grid-template-columns:28px 1fr;gap:7px;align-items:start;font-size:11px}.score-badge{width:25px;height:25px;border-radius:7px;background:#f3f4f6;display:grid;place-items:center;font-weight:850}
+.evidence-table{min-width:1100px}.pill{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap}.pill.direct{background:#dcfce7;color:#166534}.pill.adjacent{background:#dbeafe;color:#1d4ed8}.pill.benchmark{background:#fef3c7;color:#92400e}.pill.not-relevant{background:#f3f4f6;color:#6b7280}.pill.keep{background:#dcfce7;color:#166534}.pill.add{background:#dbeafe;color:#1d4ed8}.pill.change{background:#fef3c7;color:#92400e}.pill.remove{background:#fee2e2;color:#991b1b}.pill.p0{background:#fee2e2;color:#991b1b}.pill.p1{background:#ffedd5;color:#9a3412}.pill.p2{background:#e0e7ff;color:#3730a3}
+.notice{padding:11px 12px;border-radius:9px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;font-size:12px;margin-bottom:14px}.muted{color:var(--muted)}.mono{font-variant-numeric:tabular-nums}.sticky-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.idea-status{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.status-box{border:1px solid var(--line);border-radius:9px;padding:10px}.status-box strong{display:block;font-size:11px;margin-bottom:4px}.status-box textarea{min-height:70px}
+.final-call{display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:center}.final-call select{font-size:16px;font-weight:850}
+.empty-state{padding:36px;text-align:center;color:var(--muted)}.empty-state h3{color:var(--ink);margin-bottom:6px}.toast{position:fixed;right:20px;bottom:20px;background:#111827;color:#fff;padding:10px 14px;border-radius:9px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:50;font-size:12px}.toast.show{opacity:1;transform:translateY(0)}
+@media (max-width:1200px){.app-shell{grid-template-columns:215px minmax(0,1fr)}.guide-panel{display:none}}
+@media (max-width:820px){.topbar{height:auto;min-height:68px;padding:12px 14px;align-items:flex-start}.top-actions{justify-content:flex-end}.app-shell{display:block}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}.nav-list{display:flex;flex-direction:row;overflow:auto}.nav-item{width:auto;min-width:max-content}.sidebar-actions{display:none}.main-content{padding:18px 12px 45px}.page-head{display:block}.page-actions{justify-content:flex-start;margin-top:12px}.form-grid,.form-grid.three{grid-template-columns:1fr}.field.span2{grid-column:auto}.score-summary{grid-template-columns:repeat(2,1fr)}.learning-grid{grid-template-columns:1fr}.learning-label{border-bottom:0;padding-bottom:2px}.learning-value{padding-top:2px}.idea-status{grid-template-columns:1fr}.final-call{grid-template-columns:1fr}.brand-sub{display:none}}
+@media print{.topbar,.sidebar,.guide-panel,.page-actions,.sidebar-actions,.toast{display:none!important}.app-shell{display:block}.main-content{padding:0}.card{box-shadow:none;break-inside:avoid}.data-table th{position:static}.cell-input,.cell-textarea,.cell-select,.field input,.field textarea,.field select{border:0;padding:0;resize:none;background:transparent}.table-wrap{overflow:visible}.data-table{min-width:0;font-size:9px}}
+
+/* GitHub sync */
+.modal-backdrop[hidden]{display:none!important}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.58);display:flex;align-items:center;justify-content:center;padding:24px;z-index:1000}
+.modal{width:min(760px,100%);background:#fff;border-radius:18px;box-shadow:0 24px 70px rgba(15,23,42,.28);overflow:hidden}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 24px 16px;border-bottom:1px solid #e5e7eb}
+.modal-head h2{margin:0 0 6px;font-size:22px;color:#111827}
+.modal-head p{margin:0;color:#6b7280;font-size:14px}
+.modal-body{padding:22px 24px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 22px;border-top:1px solid #e5e7eb;background:#f9fafb}
+.icon-btn{border:0;background:transparent;font-size:28px;line-height:1;color:#6b7280;cursor:pointer;padding:0 4px}
+.form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.span-2{grid-column:span 2}
+.check-row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:14px;color:#374151}
+.security-note{margin-top:14px;padding:12px 14px;border:1px solid #fde68a;background:#fffbeb;color:#92400e;border-radius:10px;font-size:13px;line-height:1.5}
+.github-status{margin-top:14px;padding:10px 12px;border-radius:10px;background:#f3f4f6;color:#4b5563;font-size:13px}
+.github-status.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.github-status.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.github-status.working{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.top-actions .btn.primary{box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+@media (max-width:760px){.form-grid.two{grid-template-columns:1fr}.span-2{grid-column:span 1}.modal-backdrop{padding:12px}.modal{max-height:94vh;overflow:auto}.top-actions{gap:6px;flex-wrap:wrap}}
+
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">G</div>
+      <div>
+        <div class="brand-title">Game Competitor Analysis</div>
+        <div class="brand-sub">Competitor → Learning → Idea Adjustment</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost" id="newProjectBtn">Project mới</button>
+      <button class="btn ghost" id="githubConnectBtn">GitHub</button>
+      <button class="btn ghost" id="githubLoadBtn">Load GitHub</button>
+      <button class="btn primary" id="githubSaveBtn">Save GitHub</button>
+      <button class="btn ghost" id="importBtn">Import JSON</button>
+      <button class="btn ghost" id="exportBtn">Export JSON</button>
+      <button class="btn ghost" id="printBtn">Print / PDF</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden />
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <span class="eyebrow">PROJECT</span>
+        <input id="projectNameInput" class="project-name" aria-label="Project name" />
+      </div>
+      <nav id="sidebarNav" class="nav-list"></nav>
+      <div class="sidebar-actions">
+        <button class="btn primary wide" id="addCompetitorBtn">+ Thêm competitor</button>
+        <div class="small-note">Dữ liệu tự lưu trên trình duyệt. Bấm Save GitHub để commit data/project.json và chia sẻ cho team.</div>
+      </div>
+    </aside>
+
+    <main id="mainContent" class="main-content"></main>
+    <aside id="guidePanel" class="guide-panel"></aside>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="githubModal" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="githubModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="githubModalTitle">Kết nối GitHub</h2>
+          <p>Lưu dữ liệu phân tích trực tiếp vào repo bằng GitHub Contents API.</p>
+        </div>
+        <button class="icon-btn" id="githubModalClose" aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid two">
+          <div class="field"><label>Owner / Organization</label><input id="ghOwner" placeholder="your-github-username" /></div>
+          <div class="field"><label>Repository</label><input id="ghRepo" placeholder="game-competitor-analysis" /></div>
+          <div class="field"><label>Branch</label><input id="ghBranch" value="main" /></div>
+          <div class="field"><label>Data file path</label><input id="ghPath" value="data/project.json" /></div>
+          <div class="field span-2"><label>Fine-grained Personal Access Token</label><input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_..." /></div>
+        </div>
+        <label class="check-row"><input id="ghAutoLoad" type="checkbox" checked /> Tự load dữ liệu từ GitHub khi mở website</label>
+        <div class="security-note">
+          <b>Bảo mật:</b> tạo <b>fine-grained token</b> chỉ cho đúng repo này, quyền <b>Contents: Read and write</b>. Token chỉ được giữ trong <b>sessionStorage</b> của tab trình duyệt, không ghi vào repo hay JSON export.
+        </div>
+        <div id="ghStatus" class="github-status">Chưa kiểm tra kết nối.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="ghTestBtn">Test connection</button>
+        <button class="btn primary" id="ghSaveConfigBtn">Lưu cấu hình</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+window.DEFAULT_PROJECT = {
+  version: 1,
+  projectName: "Cooking Order Puzzle — Competitor Analysis",
+  originalIdea: {
+    workingTitle: "Original prototype — Cooking Order Puzzle",
+    genrePlatform: "Casual Puzzle / Cooking / Mobile Portrait",
+    coreMechanic: "Customer order → xác định ingredient cần tìm → tap/chọn đúng ingredient tile trên grid để fulfill order.",
+    coreLoop: "Nhận order → tìm/chọn ingredient → complete dish/order → serve customer → chuyển sang customer tiếp theo → clear level.",
+    metaProgression: "Level-based progression (video thể hiện Lv1–3); số order/customer cần xử lý tăng theo level. Meta ngoài core chưa được thể hiện.",
+    audienceTheme: "Casual puzzle audience; cooking/restaurant fantasy; motivation chính là fulfill order và phục vụ customer.",
+    uspHook: "Cooking theme nối trực tiếp với puzzle: order tạo mục tiêu, ingredient grid là task xử lý; flow dễ hiểu và không bị gượng.",
+    monetExpected: "Chưa xác định từ gameplay original. Có CTA 'FREE' ở extra customer slot nhưng video chưa đủ để kết luận đó là Rewarded Ad/IAP."
+  },
+  competitors: [
+    {
+      id: "comp-01",
+      name: "Happy Restaurant 3D",
+      identification: {
+        storeLink: "Chưa có official store link — evidence từ gameplay/screenshot user cung cấp",
+        platform: "Mobile dọc; chưa xác minh OS",
+        publisher: "DRAGONVALE LIMITED",
+        genre: "Casual 3D puzzle / cooking / object search",
+        marketSignal: "$1.09M rev/30d; ~486K downloads; RPD all-time $1.32 Global / $3.6 Tier-1 West (market data user cung cấp)",
+        sourceEvidence: "Gameplay video + screenshots feature/IAP + market data screenshot + 2 top creative videos + observation gameplay user cung cấp",
+        marketFocus: "Chưa xác minh",
+        lastChecked: "2026-09-14"
+      },
+      why: {
+        reason: "Direct competitor ở core gameplay và cách dùng theme: cả hai đều dùng customer order để tạo target, player tìm ingredient để complete dish/order. Happy Restaurant dùng 3D clutter search; original dùng grid/tile search.",
+        similarity: "Cùng flow Order → xác định ingredient → tìm/chọn trên board → fulfill dish → serve/next customer. Cùng cooking/restaurant fantasy và cùng biến ingredient-search thành task có mục đích.",
+        difference: "Khác cách thể hiện và cảm giác chơi: original dùng grid/tile rõ state và ít che khuất; Happy Restaurant dùng 3D clutter/visual search, feedback/clear payoff mạnh hơn và đã có Meta/LiveOps/Monet sâu hơn."
+      },
+      factors: {
+        coreMechanic: { score: 4, analysis: "Cùng logic order-driven ingredient search. Original dùng grid/tile rõ ràng; Happy Restaurant dùng 3D clutter/visual search. Điểm đáng học là mỗi thao tác tìm item đều gắn trực tiếp với mục tiêu hoàn thành món, nên gameplay không bị gượng." },
+        coreLoop: { score: 5, analysis: "Cùng flow Order → xác định nguyên liệu → tìm/chọn trên board → hoàn thành món → serve/next customer → clear level. Happy Restaurant còn để reward từ core level cộng tiến độ cho nhiều Meta/Event, giúp một lần chơi phục vụ nhiều mục tiêu." },
+        metaProgression: { score: null, analysis: "Happy Restaurant có 7-Day Login, Balloon Rise, Dream Carnival (Merge), Mole Race và Piggy Bank. Mỗi feature tạo một lý do quay lại khác nhau: nhận thưởng, giữ streak, chơi mode phụ, cạnh tranh hoặc tích lũy value. Original hiện chưa có đủ dữ liệu Meta để chấm mức độ giống." },
+        audienceTheme: { score: 5, analysis: "Cùng casual puzzle + cooking/restaurant fantasy. Customer order món → player tìm nguyên liệu → hoàn thành món, nên mục tiêu puzzle matching tự nhiên với nhu cầu của dòng cooking/time-management." },
+        usp: { score: 4, analysis: "Điểm mạnh không chỉ là mechanic tìm item mà là cách nối Order → Find ingredients → Complete/Serve thành một flow hoàn chỉnh. Order phía trên giải thích vì sao player phải tìm item; thao tác tìm nguyên liệu không bị gượng. Happy Restaurant có cảm giác hoàn chỉnh hơn nhờ feedback và payoff khi complete/serve rõ hơn." },
+        creatives: { score: 4, analysis: "Hai top creative đều đánh mạnh vào cooking/time-management fantasy hơn là object-search thuần. Creative 01 (Japanese Greengrocer): customer → order → scan quầy nhiều item → tìm đúng → clear dần → fail. Creative 02 (Sandwich Store): customer → order → tìm food/drink trên shelf → fulfill → khách tiếp theo → fail. Điểm nên học: bán cảm giác phục vụ order để video dễ hiểu ngay." },
+        store: { score: null, analysis: "Chưa có đủ store asset để chấm similarity. Cần check icon, screenshot và title đang bán cooking/restaurant, visual search hay puzzle challenge." },
+        monetization: { score: null, analysis: "Hybrid IAA + IAP. Interstitial bắt đầu khoảng Level 15; sau đó gần như clear 1 level = 1 interstitial. Rewarded Ads gắn với độ khó; placement nổi bật là thêm khách hàng, cap 5 lần/ngày. IAP có Dream Pass, Event Pack, bundle, tiered pack, BOGO, Piggy Bank và gói gem/booster/life/event currency. Original chưa có đủ dữ liệu monet để chấm mức độ giống." },
+        balance: { score: null, analysis: "Game bắt đầu khó rõ từ khoảng Level 20, chia Normal / Hard / Super Hard. Hard thường cần retry; Super Hard tăng nhu cầu booster/RV/IAP. Độ khó nối với Economy + LiveOps: level khó → cần thêm resource → nhận reward từ Event/Meta hoặc ads/IAP → quay lại vượt level. Original chưa có đủ dữ liệu balance để chấm mức độ giống." },
+        traction: { score: 5, analysis: "Dữ liệu user cung cấp cho thấy market signal mạnh: khoảng $1.09M revenue/30 ngày, 486,067 downloads/30 ngày; RPD all-time $1.32 Global và $3.6 Tier-1 West. Đủ mạnh để dùng làm mốc tham khảo về thị trường." }
+      },
+      learning: {
+        learn: "Giữ cách nối customer order → tìm nguyên liệu → hoàn thành món vì rất dễ hiểu và đúng với theme cooking. Nên học thêm cách làm feedback khi tap/complete/serve rõ hơn, cùng cách dùng Meta/Event để tạo thêm lý do quay lại chơi.",
+        avoid: "Không cần copy board 3D quá rối, độ khó tăng quá nhanh, tần suất gần 1 interstitial/level hoặc mở quá nhiều event cùng lúc. Original đang có lợi thế board grid/tile dễ đọc hơn.",
+        impact: "Giữ core gameplay hiện tại. Nên làm rõ hơn cảm giác phục vụ khách và hoàn thành món; sau khi core ổn mới bổ sung Meta/Event, reward và monetization để sản phẩm đầy đủ hơn. Creative nên tập trung vào cooking/time-management service flow thay vì quảng cáo như tile puzzle thuần.",
+        risk: "Board grid/tile dễ đọc nhưng có thể tạo cảm giác giống puzzle thông thường nếu phần order, serve và feedback chưa đủ nổi bật. Khi đó người chơi có thể không cảm nhận rõ đây là một cooking/service game.",
+        conclusion: "Happy Restaurant 3D là direct competitor ở core loop, audience và cooking flow. Nên dùng làm tham khảo cho cách nối gameplay với theme cooking, cảm giác chơi, Meta/Event và monetization; original vẫn nên giữ lợi thế board/grid rõ ràng và cách thể hiện riêng.",
+        sources: "Nguồn user cung cấp: original gameplay video (Lv1–3); Happy Restaurant gameplay video; ảnh LiveOps/IAP/ads; 2 top creative videos; ảnh market data. Các phần Meta/Store/Monet/Balance của original chưa có đủ dữ liệu nên chưa chấm mức độ giống."
+      }
+    }
+  ],
+  ideaAdjustment: {
+    rows: [
+      { category:"Core Gameplay", originalKey:"coreMechanic", competitorsDoing:"Cùng kiểu customer order → tìm nguyên liệu. Happy Restaurant dùng board 3D nhiều item; original dùng grid/tile dễ đọc hơn.", action:"KEEP", suggestion:"Giữ grid/tile ingredient search và objective theo order; tăng feedback khi chọn đúng và khi hoàn thành món.", references:"Happy Restaurant 3D", rationale:"Core đã dễ hiểu và hợp với theme cooking; không cần đổi mechanic chỉ để giống competitor.", priority:"P0" },
+      { category:"Core Loop", originalKey:"coreLoop", competitorsDoing:"Cùng flow Order → tìm ingredient → complete dish → serve/next customer. Happy Restaurant còn dùng reward từ level để cộng tiến độ cho nhiều Event.", action:"KEEP", suggestion:"Giữ core loop hiện tại; sau này có thể để reward từ level đồng thời cộng tiến độ cho Meta/Event.", references:"Happy Restaurant 3D", rationale:"Core loop đã rõ; một lần clear level có thể phục vụ thêm nhiều mục tiêu mà không làm gameplay chính rối hơn.", priority:"P0" },
+      { category:"Meta / Progression", originalKey:"metaProgression", competitorsDoing:"Competitor có Login, Balloon Rise, Merge event, Race và Piggy Bank để tạo thêm lý do quay lại chơi.", action:"ADD", suggestion:"Sau khi core ổn, bổ sung 1–2 Meta/Event trước; không cần mở nhiều hệ thống cùng lúc.", references:"Happy Restaurant 3D", rationale:"Original hiện mới có level progression; còn thiếu mục tiêu phụ và lý do quay lại ngoài core level.", priority:"P1" },
+      { category:"Audience / Theme", originalKey:"audienceTheme", competitorsDoing:"Cùng casual puzzle + cooking/restaurant. Customer order giải thích trực tiếp vì sao player phải tìm ingredient.", action:"KEEP", suggestion:"Giữ cooking/restaurant theme và flow phục vụ khách làm hướng chính.", references:"Happy Restaurant 3D", rationale:"Theme và gameplay nối tự nhiên, giúp người chơi hiểu mục tiêu ngay.", priority:"P0" },
+      { category:"USP / Positioning", originalKey:"uspHook", competitorsDoing:"Competitor có cảm giác sản phẩm hoàn chỉnh hơn nhờ order rõ, tap có phản hồi nhanh và complete/serve có payoff.", action:"CHANGE", suggestion:"Đẩy idea theo hướng “cooking service puzzle”: order → tìm nguyên liệu → complete/serve, với feedback rõ ở từng bước.", references:"Happy Restaurant 3D", rationale:"Original có logic tốt nhưng có thể bị nhìn như tile puzzle nếu phần cooking/serve chưa đủ nổi bật.", priority:"P0" },
+      { category:"Creative / UA", originalKey:null, current:"Chưa xác định", competitorsDoing:"Top creatives bán cooking/time-management flow: customer → order → tìm item → fulfill → khách tiếp theo.", action:"ADD", suggestion:"Creative nên ưu tiên flow phục vụ khách; dùng board nhiều item + khoảnh khắc fulfill/serve làm điểm hút.", references:"Happy Restaurant 3D", rationale:"Fantasy cooking quen thuộc giúp người xem hiểu video nhanh hơn so với quảng cáo như puzzle thuần.", priority:"P0" },
+      { category:"Monetization", originalKey:"monetExpected", competitorsDoing:"Competitor dùng Hybrid IAA + IAP: interstitial sau early game, Rewarded Ads hỗ trợ lúc khó, IAP/pass/bundle gắn với Event và progress.", action:"ADD", suggestion:"Sau khi core ổn mới thiết kế monet: Interstitial, Rewarded Ads hỗ trợ khi khó và IAP gắn với resource/booster/pass/event. Không copy gần 1 interstitial/level.", references:"Happy Restaurant 3D", rationale:"Original chưa có hướng monet rõ; competitor cho thấy ads/IAP hiệu quả hơn khi gắn với độ khó, resource và Event.", priority:"P1" },
+      { category:"Balance / Economy", originalKey:null, current:"Chưa xác định", competitorsDoing:"Game khó rõ từ khoảng Lv20; Hard/Super Hard làm player retry và cần thêm resource; Event/Meta trả reward quay lại hỗ trợ core.", action:"ADD", suggestion:"Thiết kế độ khó theo từng giai đoạn: đầu game dễ → giữa game bắt đầu retry → level khó tạo nhu cầu resource; Event/Meta phải có reward hỗ trợ người chơi vượt level.", references:"Happy Restaurant 3D", rationale:"Challenge cần đi cùng cách hỗ trợ; nếu chỉ tăng khó sẽ dễ làm người chơi bỏ.", priority:"P1" }
+    ],
+    topChanges: [
+      { title:"Làm rõ cảm giác complete/serve để cooking theme nổi bật hơn", action:"CHANGE", reference:"Happy Restaurant 3D", why:"Core đúng nhưng có thể giống tile puzzle nếu feedback và khoảnh khắc serve chưa đủ rõ.", expected:"Game dễ hiểu hơn, cảm giác hoàn thành món rõ và satisfying hơn.", test:"Prototype 3 mức feedback: chọn ingredient / complete dish / serve customer; user test độ dễ hiểu và cảm giác thỏa mãn.", priority:"P0" },
+      { title:"Creative tập trung vào flow phục vụ khách kiểu Cooking / Time-management", action:"ADD", reference:"Happy Restaurant 3D – Top Creative 01/02", why:"Top creatives cho thấy Order → Fulfill → Next customer dễ hiểu và dễ quảng cáo hơn visual-search thuần.", expected:"Creative dễ hiểu hơn và có thêm nhiều hướng test.", test:"Test 2 hướng: service flow vs puzzle-first; so CTR/IPM/CVR.", priority:"P0" },
+      { title:"Bổ sung Meta/Event + cách hỗ trợ khi level khó + monetization sau khi core ổn", action:"ADD", reference:"Happy Restaurant 3D", why:"Original mới thể hiện core level; competitor cho thấy game đơn giản cần thêm mục tiêu phụ, reward và cách hỗ trợ người chơi khi khó.", expected:"Tăng lý do quay lại chơi và tạo điểm xem ads/mua hàng tự nhiên hơn.", test:"Thiết kế 1 event giữ chân + 1 event streak + 1 Rewarded Ads support; theo dõi D1/D3/D7, tỷ lệ tham gia event và sử dụng RV.", priority:"P1" }
+    ],
+    final: {
+      summary:"Giữ core tìm nguyên liệu theo order trên grid và theme cooking/restaurant. Làm rõ flow Order → Find → Complete/Serve bằng feedback tốt hơn; creative tập trung vào cảm giác phục vụ khách thay vì tile puzzle thuần. Sau khi core ổn, bổ sung Meta/Event, độ khó theo giai đoạn và Hybrid IAA+IAP để hỗ trợ progression; không copy nguyên tần suất ads hoặc số lượng event của competitor.",
+      keep:"Core ingredient-search trên grid; order-driven objective; cooking/restaurant fantasy; readability của board.",
+      add:"Cảm giác complete/serve; creative theo cooking/time-management; Meta/Event; cách hỗ trợ khi level khó; Hybrid IAA+IAP sau khi core ổn.",
+      change:"Định vị từ “tile/ingredient puzzle” → “cooking service puzzle”; reward sau level có thể đồng thời cộng tiến độ cho nhiều Meta/Event.",
+      remove:"Không copy board 3D quá rối, tăng độ khó quá sớm, gần 1 interstitial mỗi level hoặc mở quá nhiều event ngay từ đầu.",
+      reference:"Happy Restaurant 3D — tham khảo cho cooking flow, cảm giác chơi, creative, Meta/Event và monetization/balance.",
+      call:"ITERATE IDEA",
+      nextTest:"Prototype cảm giác complete/serve → test 2 creative angles → thiết kế 1–2 Meta/Event cho D0–D7 → sau đó mới chốt balance/monet."
+    }
+  }
+};
+
+</script>
+  <script>
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'game-competitor-analysis-v1';
+  const GITHUB_CONFIG_KEY = 'game-competitor-analysis-github-config-v1';
+  const GITHUB_TOKEN_KEY = 'game-competitor-analysis-github-token-v1';
+  const FACTORS = [
+    {key:'coreMechanic', label:'Core mechanic', weight:.20, question:'Cách chơi chính có giống idea gốc không?'},
+    {key:'coreLoop', label:'Core loop', weight:.10, question:'Chu trình chơi → hoàn thành mục tiêu → nhận thưởng → chơi tiếp có giống không?'},
+    {key:'metaProgression', label:'Meta / Progression', weight:.10, question:'Cách mở level, event, collection và tiến trình dài hạn có giống không?'},
+    {key:'audienceTheme', label:'Audience / Theme / Intent', weight:.10, question:'Có nhắm cùng nhóm người chơi, theme và nhu cầu chơi không?'},
+    {key:'usp', label:'USP / Value Proposition', weight:.10, question:'Điểm khác biệt chính của game là gì? Có trùng với idea gốc không?'},
+    {key:'creatives', label:'Top Creatives / UA Angle', weight:.15, question:'Creative tốt nhất đang bán điểm gì: gameplay, cooking, fail/win, satisfying hay thử thách?'},
+    {key:'store', label:'Store Positioning', weight:.05, question:'Icon, screenshot và thông điệp trên store đang bán điều gì? Có gần idea gốc không?'},
+    {key:'monetization', label:'Monetization', weight:.10, question:'Game kiếm tiền bằng ads/IAP như thế nào? Vị trí ads, gói bán và giá có gì đáng học?'},
+    {key:'balance', label:'Balance / Economy & Difficulty', weight:.05, question:'Game tăng độ khó ra sao? Reward, resource và monet có liên kết với độ khó như thế nào?'},
+    {key:'traction', label:'Market Scale / Traction', weight:.05, question:'Game có đủ download, revenue, ranking hoặc creative scale để làm mốc tham khảo không?'}
+  ];
+
+  const ORIGINAL_FIELDS = [
+    ['workingTitle','Working title'], ['genrePlatform','Genre / Platform'],
+    ['coreMechanic','Core mechanic'], ['coreLoop','Core loop'],
+    ['metaProgression','Meta / Progression'], ['audienceTheme','Audience / Theme'],
+    ['uspHook','USP / Hook dự kiến'], ['monetExpected','Monet dự kiến']
+  ];
+
+  let state = loadState();
+  let route = {view:'idea', competitorId:null};
+  let saveTimer = null;
+  let githubLastSha = null;
+  let githubBusy = false;
+
+  const $ = (s, root=document) => root.querySelector(s);
+  const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+  const esc = (v='') => String(v ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : clone(window.DEFAULT_PROJECT);
+    }catch(e){ return clone(window.DEFAULT_PROJECT); }
+  }
+  function saveState(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      showToast('Đã lưu');
+    }, 280);
+  }
+  function showToast(msg){
+    const el=$('#toast'); el.textContent=msg; el.classList.add('show');
+    clearTimeout(showToast.t); showToast.t=setTimeout(()=>el.classList.remove('show'),1200);
+  }
+  function uid(){ return 'comp-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function blankCompetitor(index){
+    const factors={}; FACTORS.forEach(f=>factors[f.key]={score:null,analysis:''});
+    return {
+      id:uid(), name:`Competitor ${String(index).padStart(2,'0')}`,
+      identification:{storeLink:'',platform:'',publisher:'',genre:'',marketSignal:'',sourceEvidence:'',marketFocus:'',lastChecked:new Date().toISOString().slice(0,10)},
+      why:{reason:'',similarity:'',difference:''}, factors,
+      learning:{learn:'',avoid:'',impact:'',risk:'',conclusion:'',sources:''}
+    };
+  }
+  function getComp(){ return state.competitors.find(c=>c.id===route.competitorId); }
+  function getByPath(obj, path){ return path.split('.').reduce((a,k)=>a?.[k],obj); }
+  function setByPath(obj, path, value){
+    const keys=path.split('.'); let cur=obj;
+    keys.slice(0,-1).forEach(k=>{ if(cur[k]==null) cur[k]={}; cur=cur[k]; });
+    cur[keys.at(-1)] = value;
+  }
+  function calc(comp){
+    let sum=0, answeredWeight=0, count=0;
+    FACTORS.forEach(f=>{
+      const raw=comp.factors?.[f.key]?.score;
+      const score=(raw===null||raw===''||raw===undefined)?null:Number(raw);
+      if(score!=null && !Number.isNaN(score)) {sum += f.weight*score; answeredWeight += f.weight; count++;}
+    });
+    const provisional = answeredWeight ? sum/(answeredWeight*5) : null;
+    const official = count===FACTORS.length ? sum/5 : null;
+    let type='Chưa đủ điểm';
+    if(official!=null){
+      const cm=Number(comp.factors.coreMechanic.score), cl=Number(comp.factors.coreLoop.score), at=Number(comp.factors.audienceTheme.score);
+      if(cm>=4 && cl>=4 && at>=4 && official>=.75) type='Direct';
+      else if(official>=.60) type='Adjacent';
+      else if(official>=.45) type='Benchmark';
+      else type='Not relevant';
+    }
+    return {sum,answeredWeight,count,provisional,official,type};
+  }
+  function typeClass(type){ return type.toLowerCase().replaceAll(' ','-'); }
+  function pillAction(v){ return `<span class="pill ${esc(String(v).toLowerCase())}">${esc(v)}</span>`; }
+
+  function render(){
+    $('#projectNameInput').value=state.projectName||'';
+    renderSidebar();
+    if(route.view==='competitor' && !getComp()) route={view:'idea',competitorId:null};
+    route.view==='idea' ? renderIdea() : renderCompetitor(getComp());
+  }
+
+  function renderSidebar(){
+    const nav=$('#sidebarNav');
+    nav.innerHTML=`<button class="nav-item ${route.view==='idea'?'active':''}" data-route="idea"><span class="nav-num">A</span><span class="nav-label">Idea Adjustment</span></button>`+
+      state.competitors.map((c,i)=>`<button class="nav-item ${route.competitorId===c.id?'active':''}" data-route="competitor" data-id="${esc(c.id)}"><span class="nav-num">${String(i+1).padStart(2,'0')}</span><span class="nav-label">${esc(c.name||`Competitor ${i+1}`)}</span></button>`).join('');
+  }
+
+  function renderGuide(kind){
+    const gp=$('#guidePanel');
+    if(kind==='idea'){
+      gp.innerHTML=`<h3 class="guide-title">HƯỚNG DẪN ĐIỀN TAB</h3><p class="guide-sub">Logic: Idea gốc → xem đối thủ → chốt GIỮ / BỔ SUNG / THAY ĐỔI / BỎ → viết lại idea.</p>
+      <table class="guide-table"><thead><tr><th>Mục</th><th>Nên điền gì?</th></tr></thead><tbody>
+      <tr><td>1. Idea gốc</td><td>Ghi lại idea ban đầu trước khi xem competitor.</td></tr>
+      <tr><td>2. Dữ liệu competitor</td><td>Tự tổng hợp từ Mục 4 của từng tab competitor.</td></tr>
+      <tr><td>3. Điều chỉnh idea</td><td>Với từng phần, chốt KEEP / ADD / CHANGE / REMOVE + game tham khảo.</td></tr>
+      <tr><td>4. Top thay đổi</td><td>Chọn tối đa 3 thay đổi quan trọng nhất.</td></tr>
+      <tr><td>5. Idea sau khi chỉnh</td><td>Review hướng mới sau khi áp dụng các đề xuất.</td></tr>
+      <tr><td>6. Kết luận cuối</td><td>Chốt idea nên giữ, iterate, pivot hay drop và nói rõ bước test tiếp.</td></tr>
+      </tbody></table><div class="guide-rule"><b>Nguyên tắc:</b> Mỗi đề xuất cần có game / dữ liệu làm căn cứ. Thiếu dữ liệu thì ghi rõ, không suy đoán.</div>`;
+    } else {
+      gp.innerHTML=`<h3 class="guide-title">HƯỚNG DẪN ĐIỀN TAB</h3><p class="guide-sub">Mục 3 là phần chính. Mục 4 chỉ chốt game này ảnh hưởng gì tới idea gốc.</p>
+      <table class="guide-table"><thead><tr><th>Mục</th><th>Nên điền gì?</th></tr></thead><tbody>
+      <tr><td>1. Thông tin game</td><td>Xác định đúng game, publisher, platform và nguồn dữ liệu.</td></tr>
+      <tr><td>2. Vì sao là competitor</td><td>Nêu ngắn gọn điểm giống/khác quan trọng so với idea gốc.</td></tr>
+      <tr><td>3. Fit Score + Phân tích</td><td>Chấm độ giống và giải thích game đang thiết kế yếu tố đó như thế nào. Viết rõ, tránh jargon.</td></tr>
+      <tr><td>4. Kết luận</td><td>Chốt điểm nên học, không nên copy, idea cần đổi và rủi ro.</td></tr>
+      </tbody></table>
+      <div class="score-guide">
+        <div class="score-row"><span class="score-badge">1</span><span>Rất khác idea gốc; chỉ tham khảo feature riêng lẻ.</span></div>
+        <div class="score-row"><span class="score-badge">2</span><span>Có một số điểm giống nhưng direction chính khác.</span></div>
+        <div class="score-row"><span class="score-badge">3</span><span>Overlap vừa; benchmark được nhưng cần adapt nhiều.</span></div>
+        <div class="score-row"><span class="score-badge">4</span><span>Rất gần idea; cùng direction chính, khác execution.</span></div>
+        <div class="score-row"><span class="score-badge">5</span><span>Gần như cùng direction; có thể xem là direct competitor.</span></div>
+      </div>
+      <div class="guide-rule"><b>Lưu ý:</b> Score đo mức độ fit với Original Idea, không phải game tốt/xấu. Riêng Market Scale / Traction đo độ mạnh của market proof.</div>`;
+    }
+  }
+
+  function inputField(label,path,value,opts={}){
+    const cls=opts.span2?'field span2':'field';
+    const tag=opts.textarea?'textarea':'input';
+    return `<div class="${cls}"><label>${esc(label)}</label>${tag==='textarea'?`<textarea data-bind="${esc(path)}" rows="${opts.rows||3}">${esc(value)}</textarea>`:`<input data-bind="${esc(path)}" value="${esc(value)}" ${opts.type?`type="${opts.type}"`:''}/>`}</div>`;
+  }
+
+  function renderIdea(){
+    renderGuide('idea');
+    const ia=state.ideaAdjustment || (state.ideaAdjustment={rows:[],topChanges:[],final:{}});
+    const evidence=state.competitors.map((c,i)=>{
+      const s=calc(c); const fit=s.official!=null?`${Math.round(s.official*100)}%`:`Partial — ${s.count}/10 scored`;
+      return `<tr><td>${i+1}</td><td><button class="link-btn" data-open-comp="${esc(c.id)}">${esc(c.name)}</button></td><td>${s.official!=null?`<span class="pill ${typeClass(s.type)}">${esc(s.type)}</span>`:'<span class="muted">Chưa đủ điểm</span>'}</td><td class="mono">${esc(fit)}</td><td>${esc(c.learning?.learn||'')}</td><td>${esc(c.learning?.avoid||'')}</td><td>${esc(c.learning?.impact||'')}</td><td>${esc(c.learning?.conclusion||'')}</td></tr>`;
+    }).join('') || `<tr><td colspan="8" class="empty-state">Chưa có competitor.</td></tr>`;
+
+    const adjustRows=ia.rows.map((r,i)=>{
+      const current=r.originalKey?state.originalIdea[r.originalKey]:(r.current||'');
+      return `<tr><td class="factor">${esc(r.category)}</td><td>${esc(current)}</td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.competitorsDoing">${esc(r.competitorsDoing)}</textarea></td><td><select class="cell-select" data-bind="ideaAdjustment.rows.${i}.action">${['KEEP','ADD','CHANGE','REMOVE'].map(x=>`<option ${r.action===x?'selected':''}>${x}</option>`).join('')}</select></td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.suggestion">${esc(r.suggestion)}</textarea></td><td><input class="cell-input" data-bind="ideaAdjustment.rows.${i}.references" value="${esc(r.references)}"></td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.rows.${i}.rationale">${esc(r.rationale)}</textarea></td><td><select class="cell-select" data-bind="ideaAdjustment.rows.${i}.priority">${['P0','P1','P2'].map(x=>`<option ${r.priority===x?'selected':''}>${x}</option>`).join('')}</select></td></tr>`;
+    }).join('');
+
+    const changes=ia.topChanges.map((r,i)=>`<tr><td>${i+1}</td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.topChanges.${i}.title">${esc(r.title)}</textarea></td><td><select class="cell-select" data-bind="ideaAdjustment.topChanges.${i}.action">${['KEEP','ADD','CHANGE','REMOVE'].map(x=>`<option ${r.action===x?'selected':''}>${x}</option>`).join('')}</select></td><td><input class="cell-input" data-bind="ideaAdjustment.topChanges.${i}.reference" value="${esc(r.reference)}"></td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.topChanges.${i}.why">${esc(r.why)}</textarea></td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.topChanges.${i}.expected">${esc(r.expected)}</textarea></td><td><textarea class="cell-textarea" data-bind="ideaAdjustment.topChanges.${i}.test">${esc(r.test)}</textarea></td><td><select class="cell-select" data-bind="ideaAdjustment.topChanges.${i}.priority">${['P0','P1','P2'].map(x=>`<option ${r.priority===x?'selected':''}>${x}</option>`).join('')}</select></td></tr>`).join('');
+
+    const revised=ia.rows.map(r=>`<tr><td class="factor">${esc(r.category)}</td><td>${esc(r.suggestion || (r.originalKey?state.originalIdea[r.originalKey]:(r.current||'')))}</td><td>${pillAction(r.action)}</td><td>${esc(r.references)}</td><td>${esc(r.rationale)}</td></tr>`).join('');
+
+    $('#mainContent').innerHTML=`
+      <div class="page-head"><div><h1 class="page-title">Game Idea Adjustment</h1><p class="page-sub">Idea gốc → phân tích competitor → chốt GIỮ / BỔ SUNG / THAY ĐỔI / BỎ → viết lại idea.</p></div></div>
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">1</span>ORIGINAL IDEA — IDEA TRƯỚC KHI PHÂN TÍCH COMPETITOR</h2></div></div><div class="card-body"><div class="form-grid">${ORIGINAL_FIELDS.map(([k,l],idx)=>inputField(l,`originalIdea.${k}`,state.originalIdea[k]||'',{textarea:idx>1,span2:idx>1,rows:2})).join('')}</div></div></div>
+
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">2</span>COMPETITOR EVIDENCE — MỖI TAB CON ĐÓNG GÓP GÌ?</h2><div class="card-desc">Tự kéo từ Mục 4 của từng competitor.</div></div></div><div class="card-body"><div class="table-wrap"><table class="data-table evidence-table"><thead><tr><th>#</th><th>Game</th><th>Type</th><th>Fit</th><th>Điểm nên học</th><th>Điểm không nên copy</th><th>Idea gốc nên thay đổi gì</th><th>Kết luận</th></tr></thead><tbody>${evidence}</tbody></table></div></div></div>
+
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">3</span>IDEA ADJUSTMENT SCORECARD</h2><div class="card-desc">Với từng hạng mục, chốt nên giữ, bổ sung, thay đổi hay bỏ.</div></div></div><div class="card-body"><div class="table-wrap"><table class="data-table"><thead><tr><th>Hạng mục</th><th>Idea hiện tại</th><th>Đối thủ đang làm gì</th><th>Action</th><th>Đề xuất cho idea</th><th>Game tham khảo</th><th>Vì sao nên làm</th><th>Ưu tiên</th></tr></thead><tbody>${adjustRows}</tbody></table></div><div class="notice" style="margin-top:12px"><b>KEEP</b> = giữ · <b>ADD</b> = bổ sung · <b>CHANGE</b> = thay đổi · <b>REMOVE</b> = bỏ / tránh.</div></div></div>
+
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">4</span>TOP CHANGES — 3 THAY ĐỔI QUAN TRỌNG NHẤT</h2></div></div><div class="card-body"><div class="table-wrap"><table class="data-table"><thead><tr><th>#</th><th>Idea cần thay đổi gì?</th><th>Action</th><th>Học từ game nào?</th><th>Vì sao cần đổi?</th><th>Kết quả mong đợi</th><th>Cần test gì?</th><th>Priority</th></tr></thead><tbody>${changes}</tbody></table></div></div></div>
+
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">5</span>IDEA SAU KHI ĐIỀU CHỈNH</h2></div></div><div class="card-body"><div class="table-wrap"><table class="data-table"><thead><tr><th>Hạng mục</th><th>Hướng sau khi chỉnh</th><th>Action</th><th>Game tham khảo</th><th>Lý do chính</th></tr></thead><tbody>${revised}</tbody></table></div></div></div>
+
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">6</span>KẾT LUẬN CUỐI — IDEA NÊN THAY ĐỔI NHƯ THẾ NÀO?</h2></div></div><div class="card-body">
+        <div class="form-grid">${inputField('Idea sau khi điều chỉnh','ideaAdjustment.final.summary',ia.final.summary||'',{textarea:true,span2:true,rows:4})}</div>
+        <div class="idea-status" style="margin-top:12px">
+          ${['keep','add','change','remove'].map((k,i)=>`<div class="status-box"><strong>${['Giữ lại','Bổ sung','Thay đổi','Bỏ / Tránh'][i]}</strong><textarea data-bind="ideaAdjustment.final.${k}">${esc(ia.final[k]||'')}</textarea></div>`).join('')}
+        </div>
+        <div class="form-grid" style="margin-top:12px">${inputField('Reference chính','ideaAdjustment.final.reference',ia.final.reference||'',{textarea:true,span2:true,rows:2})}</div>
+        <div class="final-call" style="margin-top:14px"><div class="field"><label>Final Call</label><select data-bind="ideaAdjustment.final.call">${['KEEP IDEA','ITERATE IDEA','PIVOT IDEA','DROP IDEA'].map(x=>`<option ${ia.final.call===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Việc cần test tiếp</label><textarea data-bind="ideaAdjustment.final.nextTest" rows="3">${esc(ia.final.nextTest||'')}</textarea></div></div>
+      </div></div>`;
+  }
+
+  function renderCompetitor(comp){
+    renderGuide('competitor');
+    const s=calc(comp);
+    const rows=FACTORS.map(f=>{
+      const v=comp.factors[f.key]||{score:null,analysis:''};
+      const weighted=(v.score===null||v.score==='')?'':(f.weight*Number(v.score)).toFixed(2);
+      return `<tr><td class="factor">${esc(f.label)}</td><td class="weight">${Math.round(f.weight*100)}%</td><td class="score"><select class="cell-select" data-bind="factors.${f.key}.score"><option value="">—</option>${[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(v.score)===x?'selected':''}>${x}</option>`).join('')}</select></td><td class="weight mono">${esc(weighted)}</td><td class="question">${esc(f.question)}</td><td class="analysis"><textarea class="cell-textarea" data-bind="factors.${f.key}.analysis">${esc(v.analysis)}</textarea></td></tr>`;
+    }).join('');
+    const official=s.official!=null?Math.round(s.official*100)+'%':'—';
+    const provisional=s.provisional!=null?Math.round(s.provisional*100)+'%':'—';
+    $('#mainContent').innerHTML=`
+      <div class="page-head"><div><h1 class="page-title">${esc(comp.name||'Competitor')}</h1><p class="page-sub">Điền 10 yếu tố ở Mục 3; Mục 4 chỉ chốt những gì nên học và idea gốc cần thay đổi gì.</p></div><div class="page-actions"><button class="btn secondary" id="duplicateCompBtn">Nhân bản tab</button><button class="btn danger" id="deleteCompBtn">Xóa competitor</button></div></div>
+
+      <div class="card"><div class="card-head"><h2 class="card-title"><span class="section-number">1</span>COMPETITOR IDENTIFICATION</h2></div><div class="card-body"><div class="form-grid three">
+        ${inputField('Game name','name',comp.name||'')}
+        ${inputField('Store / Link','identification.storeLink',comp.identification.storeLink||'')}
+        ${inputField('Platform','identification.platform',comp.identification.platform||'')}
+        ${inputField('Publisher','identification.publisher',comp.identification.publisher||'')}
+        ${inputField('Genre','identification.genre',comp.identification.genre||'')}
+        ${inputField('Status / Market Signal','identification.marketSignal',comp.identification.marketSignal||'',{textarea:true,rows:2})}
+        ${inputField('Source / Evidence','identification.sourceEvidence',comp.identification.sourceEvidence||'',{textarea:true,rows:2})}
+        ${inputField('Country / Market focus','identification.marketFocus',comp.identification.marketFocus||'')}
+        ${inputField('Last checked','identification.lastChecked',comp.identification.lastChecked||'',{type:'date'})}
+      </div></div></div>
+
+      <div class="card"><div class="card-head"><h2 class="card-title"><span class="section-number">2</span>VÌ SAO GAME NÀY ĐƯỢC XEM LÀ COMPETITOR?</h2></div><div class="card-body"><div class="form-grid">
+        ${inputField('Vì sao là đối thủ?','why.reason',comp.why.reason||'',{textarea:true,span2:true,rows:3})}
+        ${inputField('Điểm giống quan trọng nhất','why.similarity',comp.why.similarity||'',{textarea:true,span2:true,rows:3})}
+        ${inputField('Điểm khác quan trọng nhất','why.difference',comp.why.difference||'',{textarea:true,span2:true,rows:3})}
+      </div></div></div>
+
+      <div class="card"><div class="card-head"><div><h2 class="card-title"><span class="section-number">3</span>COMPETITOR FIT SCORE — 10 YẾU TỐ</h2><div class="card-desc">Điểm đo mức độ fit với Original Idea; Market Scale đo độ mạnh của market proof.</div></div></div><div class="card-body"><div class="table-wrap"><table class="data-table"><thead><tr><th>Yếu tố</th><th>Trọng số</th><th>Score 1–5</th><th>Điểm đóng góp</th><th>Cần xem gì?</th><th>Phân tích / Ý nghĩa</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="score-summary"><div class="metric"><div class="metric-label">Đã chấm</div><div class="metric-value">${s.count}/10</div><div class="metric-note">Cần đủ 10 yếu tố để chốt type</div></div><div class="metric accent"><div class="metric-label">Fit tạm tính</div><div class="metric-value">${provisional}</div><div class="metric-note">Tính trên các yếu tố đã chấm</div></div><div class="metric green"><div class="metric-label">Fit chính thức</div><div class="metric-value">${official}</div><div class="metric-note">Chỉ hiện khi đủ 10/10</div></div><div class="metric orange"><div class="metric-label">Loại competitor</div><div class="metric-value" style="font-size:16px">${esc(s.type)}</div><div class="metric-note">Direct / Adjacent / Benchmark / Not relevant</div></div></div>
+      </div></div>
+
+      <div class="card"><div class="card-head"><h2 class="card-title"><span class="section-number">4</span>KẾT LUẬN & ẢNH HƯỞNG TỚI IDEA GỐC</h2></div><div class="card-body"><div class="learning-grid">
+        ${learningRow('Điểm nên học / tham khảo','learning.learn',comp.learning.learn)}
+        ${learningRow('Điểm không nên copy','learning.avoid',comp.learning.avoid)}
+        ${learningRow('Idea gốc nên thay đổi gì','learning.impact',comp.learning.impact)}
+        ${learningRow('Rủi ro chính','learning.risk',comp.learning.risk)}
+        ${learningRow('Kết luận / đề xuất','learning.conclusion',comp.learning.conclusion)}
+        ${learningRow('Nguồn / dữ liệu sử dụng','learning.sources',comp.learning.sources)}
+      </div></div></div>`;
+  }
+
+  function learningRow(label,path,value){return `<div class="learning-label">${esc(label)}</div><div class="learning-value"><textarea class="cell-textarea" data-bind="${esc(path)}">${esc(value||'')}</textarea></div>`;}
+
+  document.addEventListener('input', onBoundInput);
+  document.addEventListener('change', onBoundInput);
+  function onBoundInput(e){
+    const el=e.target;
+    if(!el.matches('[data-bind]')) return;
+    let value=el.value;
+    if(el.matches('select[data-bind*=".score"]')) value=value===''?null:Number(value);
+    const root=route.view==='competitor'?getComp():state;
+    setByPath(root,el.dataset.bind,value);
+    if(route.view==='competitor' && el.dataset.bind==='name') renderSidebar();
+    saveState();
+    if(route.view==='competitor' && el.dataset.bind.includes('.score')) renderCompetitor(getComp());
+  }
+
+  document.addEventListener('click', e=>{
+    const nav=e.target.closest('[data-route]');
+    if(nav){ route=nav.dataset.route==='idea'?{view:'idea',competitorId:null}:{view:'competitor',competitorId:nav.dataset.id}; render(); return; }
+    const open=e.target.closest('[data-open-comp]'); if(open){route={view:'competitor',competitorId:open.dataset.openComp};render();return;}
+    if(e.target.id==='duplicateCompBtn') duplicateCurrent();
+    if(e.target.id==='deleteCompBtn') deleteCurrent();
+  });
+
+  $('#projectNameInput').addEventListener('input',e=>{state.projectName=e.target.value;saveState();});
+  $('#addCompetitorBtn').addEventListener('click',()=>{ const c=blankCompetitor(state.competitors.length+1); state.competitors.push(c); saveState(); route={view:'competitor',competitorId:c.id}; render(); });
+  $('#exportBtn').addEventListener('click',exportJson);
+  $('#importBtn').addEventListener('click',()=>$('#importFile').click());
+  $('#importFile').addEventListener('change',importJson);
+  $('#newProjectBtn').addEventListener('click',newProject);
+  $('#printBtn').addEventListener('click',()=>window.print());
+
+  function duplicateCurrent(){
+    const c=getComp(); if(!c) return; const n=clone(c); n.id=uid(); n.name=(c.name||'Competitor')+' — Copy'; state.competitors.push(n); saveState(); route={view:'competitor',competitorId:n.id}; render();
+  }
+  function deleteCurrent(){
+    const c=getComp(); if(!c) return; if(!confirm(`Xóa ${c.name}?`)) return; state.competitors=state.competitors.filter(x=>x.id!==c.id); saveState(); route={view:'idea',competitorId:null}; render();
+  }
+  function exportJson(){
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(state.projectName||'game-competitor-analysis').replace(/[^a-z0-9-_]+/gi,'_')+'.json'; a.click(); URL.revokeObjectURL(a.href); showToast('Đã export JSON');
+  }
+  function importJson(e){
+    const file=e.target.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{try{const x=JSON.parse(reader.result); if(!x.originalIdea||!Array.isArray(x.competitors)) throw new Error('Sai format'); state=x; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render(); showToast('Import thành công');}catch(err){alert('File JSON không đúng format của template.');}}; reader.readAsText(file); e.target.value='';
+  }
+  function newProject(){
+    if(!confirm('Tạo project mới? Hãy Export JSON trước nếu muốn giữ dữ liệu hiện tại.')) return;
+    state=clone(window.DEFAULT_PROJECT); state.projectName='New Game — Competitor Analysis';
+    state.originalIdea={workingTitle:'',genrePlatform:'',coreMechanic:'',coreLoop:'',metaProgression:'',audienceTheme:'',uspHook:'',monetExpected:''};
+    state.competitors=[];
+    state.ideaAdjustment.rows.forEach(r=>{r.competitorsDoing='';r.suggestion='';r.references='';r.rationale='';r.action='KEEP';r.priority='P1'; if(r.current)r.current='';});
+    state.ideaAdjustment.topChanges.forEach(r=>Object.keys(r).forEach(k=>r[k]=k==='priority'?'P1':k==='action'?'ADD':''));
+    state.ideaAdjustment.final={summary:'',keep:'',add:'',change:'',remove:'',reference:'',call:'ITERATE IDEA',nextTest:''};
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render();
+  }
+
+
+  // ---------- GitHub sync ----------
+  function inferGitHubDefaults(){
+    const host=location.hostname||'';
+    const cfg={owner:'',repo:'',branch:'main',path:'data/project.json',autoLoad:true};
+    if(host.endsWith('.github.io')){
+      cfg.owner=host.split('.')[0]||'';
+      const seg=(location.pathname||'/').split('/').filter(Boolean);
+      cfg.repo=seg[0] || (cfg.owner ? cfg.owner+'.github.io' : '');
+    }
+    return cfg;
+  }
+  function getGitHubConfig(){
+    const defaults=inferGitHubDefaults();
+    try{
+      const saved=JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)||'{}');
+      return {...defaults,...saved};
+    }catch(e){ return defaults; }
+  }
+  function getGitHubToken(){ return sessionStorage.getItem(GITHUB_TOKEN_KEY)||''; }
+  function setGitHubToken(token){
+    if(token) sessionStorage.setItem(GITHUB_TOKEN_KEY,token);
+    else sessionStorage.removeItem(GITHUB_TOKEN_KEY);
+  }
+  function saveGitHubConfig(cfg){
+    localStorage.setItem(GITHUB_CONFIG_KEY,JSON.stringify({owner:cfg.owner,repo:cfg.repo,branch:cfg.branch,path:cfg.path,autoLoad:!!cfg.autoLoad}));
+  }
+  function githubStatus(msg,type=''){
+    const el=$('#ghStatus'); if(!el) return;
+    el.textContent=msg; el.className='github-status'+(type?' '+type:'');
+  }
+  function openGitHubModal(){
+    const cfg=getGitHubConfig();
+    $('#ghOwner').value=cfg.owner||''; $('#ghRepo').value=cfg.repo||''; $('#ghBranch').value=cfg.branch||'main'; $('#ghPath').value=cfg.path||'data/project.json';
+    $('#ghToken').value=getGitHubToken(); $('#ghAutoLoad').checked=cfg.autoLoad!==false;
+    githubStatus(getGitHubToken()?'Token đang được giữ trong tab này.':'Chưa có token trong phiên hiện tại.');
+    $('#githubModal').hidden=false;
+  }
+  function closeGitHubModal(){ $('#githubModal').hidden=true; }
+  function readGitHubForm(){
+    return {owner:$('#ghOwner').value.trim(),repo:$('#ghRepo').value.trim(),branch:$('#ghBranch').value.trim()||'main',path:$('#ghPath').value.trim()||'data/project.json',autoLoad:$('#ghAutoLoad').checked,token:$('#ghToken').value.trim()};
+  }
+  function validateGitHubConfig(cfg,needToken=false){
+    if(!cfg.owner||!cfg.repo||!cfg.branch||!cfg.path) throw new Error('Thiếu Owner, Repository, Branch hoặc Data file path.');
+    if(needToken && !cfg.token) throw new Error('Cần Fine-grained Personal Access Token để ghi dữ liệu lên GitHub.');
+  }
+  function githubHeaders(token=''){
+    const h={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+    if(token) h.Authorization='Bearer '+token;
+    return h;
+  }
+  function ghEncodePath(path){ return String(path).split('/').filter(Boolean).map(encodeURIComponent).join('/'); }
+  function githubContentUrl(cfg){
+    return `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ghEncodePath(cfg.path)}`;
+  }
+  function utf8ToBase64(text){
+    const bytes=new TextEncoder().encode(text); let bin=''; const chunk=0x8000;
+    for(let i=0;i<bytes.length;i+=chunk) bin += String.fromCharCode(...bytes.subarray(i,i+chunk));
+    return btoa(bin);
+  }
+  function base64ToUtf8(text){
+    const bin=atob(String(text||'').replace(/\n/g,'')); const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  async function githubRequest(url,options={}){
+    const res=await fetch(url,options);
+    let body=null; try{body=await res.json();}catch(e){}
+    if(!res.ok){
+      const err=new Error(body?.message || `GitHub API error ${res.status}`); err.status=res.status; err.body=body; throw err;
+    }
+    return body;
+  }
+  async function getRemoteFile(cfg,allow404=false){
+    const url=githubContentUrl(cfg)+`?ref=${encodeURIComponent(cfg.branch)}`;
+    try{
+      return await githubRequest(url,{headers:githubHeaders(cfg.token||getGitHubToken())});
+    }catch(err){ if(allow404 && err.status===404) return null; throw err; }
+  }
+  async function testGitHubConnection(){
+    const cfg=readGitHubForm();
+    try{
+      validateGitHubConfig(cfg,false); setGitHubToken(cfg.token); saveGitHubConfig(cfg);
+      githubStatus('Đang kiểm tra repo...','working');
+      const url=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`;
+      const repo=await githubRequest(url,{headers:githubHeaders(cfg.token)});
+      githubStatus(`Kết nối OK: ${repo.full_name}. ${cfg.token?'Có token để ghi dữ liệu.':'Chưa có token: chỉ đọc được repo public.'}`,'ok');
+    }catch(err){ githubStatus('Không kết nối được: '+err.message,'error'); }
+  }
+  async function saveToGitHub(){
+    if(githubBusy) return;
+    const stored=getGitHubConfig(); const cfg={...stored,token:getGitHubToken()};
+    try{
+      validateGitHubConfig(cfg,true); githubBusy=true; $('#githubSaveBtn').disabled=true; showToast('Đang lưu GitHub...');
+      const remote=await getRemoteFile(cfg,true);
+      if(githubLastSha && remote?.sha && remote.sha!==githubLastSha){
+        const overwrite=confirm('File trên GitHub đã thay đổi từ lần bạn load gần nhất. Ghi đè bằng dữ liệu hiện tại?');
+        if(!overwrite) return;
+      }
+      const payload={message:`Update analysis: ${state.projectName||'Game Competitor Analysis'}`,content:utf8ToBase64(JSON.stringify(state,null,2)),branch:cfg.branch};
+      if(remote?.sha) payload.sha=remote.sha;
+      const result=await githubRequest(githubContentUrl(cfg),{method:'PUT',headers:{...githubHeaders(cfg.token),'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      githubLastSha=result?.content?.sha || null;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      showToast('Đã lưu lên GitHub');
+    }catch(err){ alert('Không lưu được lên GitHub.\n\n'+err.message+'\n\nKiểm tra token có quyền Contents: Read and write và đúng repo/branch.'); }
+    finally{ githubBusy=false; $('#githubSaveBtn').disabled=false; }
+  }
+  async function loadFromGitHub({silent=false}={}){
+    if(githubBusy) return false;
+    const stored=getGitHubConfig(); const cfg={...stored,token:getGitHubToken()};
+    try{
+      validateGitHubConfig(cfg,false); githubBusy=true; $('#githubLoadBtn').disabled=true;
+      if(!silent) showToast('Đang load GitHub...');
+      const remote=await getRemoteFile(cfg,false);
+      if(!remote?.content) throw new Error('Không tìm thấy nội dung file dữ liệu.');
+      const incoming=JSON.parse(base64ToUtf8(remote.content));
+      if(!incoming.originalIdea||!Array.isArray(incoming.competitors)) throw new Error('File GitHub không đúng format của template.');
+      state=incoming; githubLastSha=remote.sha||null; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); route={view:'idea',competitorId:null}; render();
+      if(!silent) showToast('Đã load dữ liệu từ GitHub');
+      return true;
+    }catch(err){
+      if(!silent) alert('Không load được từ GitHub.\n\n'+err.message);
+      return false;
+    }finally{ githubBusy=false; $('#githubLoadBtn').disabled=false; }
+  }
+  function initGitHubSync(){
+    $('#githubConnectBtn')?.addEventListener('click',openGitHubModal);
+    $('#githubModalClose')?.addEventListener('click',closeGitHubModal);
+    $('#githubModal')?.addEventListener('click',e=>{if(e.target.id==='githubModal') closeGitHubModal();});
+    $('#ghSaveConfigBtn')?.addEventListener('click',()=>{try{const cfg=readGitHubForm();validateGitHubConfig(cfg,false);saveGitHubConfig(cfg);setGitHubToken(cfg.token);githubStatus('Đã lưu cấu hình. Token chỉ lưu trong tab hiện tại.','ok');showToast('Đã lưu cấu hình GitHub');}catch(err){githubStatus(err.message,'error');}});
+    $('#ghTestBtn')?.addEventListener('click',testGitHubConnection);
+    $('#githubSaveBtn')?.addEventListener('click',async()=>{const cfg=getGitHubConfig();if(!cfg.owner||!cfg.repo||!getGitHubToken()){openGitHubModal();githubStatus('Điền cấu hình + token trước, sau đó bấm Save GitHub.','working');return;}await saveToGitHub();});
+    $('#githubLoadBtn')?.addEventListener('click',async()=>{const cfg=getGitHubConfig();if(!cfg.owner||!cfg.repo){openGitHubModal();githubStatus('Điền Owner / Repository trước.','working');return;}await loadFromGitHub();});
+    const cfg=getGitHubConfig();
+    if(cfg.autoLoad && cfg.owner && cfg.repo){ loadFromGitHub({silent:true}); }
+  }
+
+  render();
+  initGitHubSync();
+})();
+
+</script>
+</body>
+</html>
