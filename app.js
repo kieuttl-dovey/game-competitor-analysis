@@ -148,6 +148,21 @@
     return {fitSum,fitWeight,fitCount,fit,learning,learningCount,highLearning,marketProof,type};
   }
   function typeClass(type){ const t=String(type||'').toLowerCase(); if(t.includes('chưa đủ')) return 'not-relevant'; return t.replaceAll(' ','-'); }
+  function levelText(value, kind){
+    if(value==null || Number.isNaN(Number(value))) return 'chưa đủ dữ liệu';
+    const v=Number(value);
+    if(kind==='market'){ if(v>=4.5) return 'rất mạnh'; if(v>=3.5) return 'khá mạnh'; if(v>=2.5) return 'trung bình'; return 'yếu'; }
+    if(v>=4.5) return 'rất cao'; if(v>=3.5) return 'cao'; if(v>=2.5) return 'trung bình'; return 'thấp';
+  }
+  function autoConclusion(s){
+    if(s.type==='Chưa đủ dữ liệu') return 'Chưa đủ dữ liệu để kết luận vai trò của game này. Cần chấm thêm Fit, Learning Value và Market Proof.';
+    const learn=levelText(s.learning,'learning');
+    const market=levelText(s.marketProof,'market');
+    if(s.type==='Direct') return `Game này rất gần Original Idea nên được xếp là Direct Competitor. Learning Value ${learn} và Market Proof ${market}, vì vậy đây là reference ưu tiên để so sánh trực tiếp.`;
+    if(s.type==='Adjacent') return `Game này không hoàn toàn giống Original nên được xếp là Adjacent Competitor, nhưng Learning Value ${learn} và Market Proof ${market}. Có thể dùng để học các điểm mạnh phù hợp mà không cần copy toàn bộ.`;
+    if(s.type==='Benchmark') return `Game này không đủ gần Original để xem là competitor trực tiếp, nhưng Learning Value ${learn}. Vì vậy phù hợp làm Benchmark cho những yếu tố đáng học; Market Proof ${market}.`;
+    return `Game này có Fit thấp và Learning Value ${learn}, nên không phải reference ưu tiên. Market Proof ${market}; chỉ nên dùng làm tham khảo thị trường nếu có yếu tố cụ thể cần học.`;
+  }
   function pillAction(v){ return `<span class="pill ${esc(String(v).toLowerCase())}">${esc(v)}</span>`; }
 
   function render(){
@@ -201,7 +216,15 @@
         <div class="score-row"><span class="score-badge learning">4</span><span>Đáng học, có thể áp dụng rõ vào idea gốc.</span></div>
         <div class="score-row"><span class="score-badge learning">5</span><span>Reference ưu tiên cho yếu tố này.</span></div>
       </div>
-      <div class="guide-rule"><b>Ví dụ:</b> Meta có thể Fit 2/5 nhưng Learning 5/5 nếu Original chưa có Meta và game này có hệ thống đáng học. Market Proof chấm riêng, không cộng vào Fit.</div>`;
+      <div class="guide-rule"><b>Ví dụ:</b> Meta có thể Fit 2/5 nhưng Learning 5/5 nếu Original chưa có Meta và game này có hệ thống đáng học. Market Proof chấm riêng, không cộng vào Fit.</div>
+      <div class="guide-score-title">CÁCH ĐỌC 4 Ô TỔNG KẾT</div>
+      <div class="score-guide">
+        <div class="score-row wide"><span class="score-badge">F</span><span><b>Fit Score:</b> độ giống với Original Idea.</span></div>
+        <div class="score-row wide"><span class="score-badge learning">L</span><span><b>Learning Value:</b> mức độ game gốc đáng học từ competitor này.</span></div>
+        <div class="score-row wide"><span class="score-badge market">M</span><span><b>Market Proof:</b> độ mạnh đã được chứng minh bằng Revenue / Download / RPD / Ranking / Creative scale.</span></div>
+        <div class="score-row wide"><span class="score-badge ref">R</span><span><b>Vai trò của game:</b> Direct / Adjacent / Benchmark / Not relevant.</span></div>
+      </div>
+      <div class="guide-rule guide-rule-blue"><b>Rule phân loại:</b><br>• <b>Direct:</b> Core Mechanic, Core Loop, Audience đều ≥ 4 và Fit ≥ 75%.<br>• <b>Adjacent:</b> Fit ≥ 60% nhưng chưa đủ điều kiện Direct.<br>• <b>Benchmark:</b> Fit &lt; 60% nhưng Learning Value ≥ 3.5/5.<br>• <b>Not relevant:</b> Fit thấp và Learning Value cũng thấp.<br><br><b>Cách đọc:</b> Một game có thể không giống Original nhiều nhưng vẫn rất đáng học. Ví dụ: “Không hoàn toàn giống Original nên chỉ là Adjacent, nhưng Learning Value rất cao và Market Proof rất mạnh.”</div>`;
     }
   }
 
@@ -335,8 +358,9 @@
           <div class="metric accent"><div class="metric-label">Fit Score</div><div class="metric-value">${fit}</div><div class="metric-note">Độ giống với Original · ${s.fitCount}/${FACTORS.length} yếu tố đã chấm</div></div>
           <div class="metric learning-metric"><div class="metric-label">Learning Value</div><div class="metric-value">${learning}</div><div class="metric-note">Mức độ đáng học · ${s.highLearning} yếu tố đạt 4–5</div></div>
           <div class="metric market-metric"><div class="metric-label">Market Proof</div><div class="metric-value">${market}</div><div class="metric-note">Độ mạnh của market signal</div></div>
-          <div class="metric orange"><div class="metric-label">Loại reference</div><div class="metric-value" style="font-size:16px">${esc(s.type)}</div><div class="metric-note">Direct / Adjacent / Benchmark / Not relevant</div></div>
+          <div class="metric orange"><div class="metric-label">Vai trò của game</div><div class="metric-value" style="font-size:16px">${esc(s.type)}</div><div class="metric-note">Direct / Adjacent / Benchmark / Not relevant</div></div>
         </div>
+        <div class="auto-conclusion ${typeClass(s.type)}"><div class="auto-conclusion-label">KẾT LUẬN TỰ ĐỘNG</div><div class="auto-conclusion-text">${esc(autoConclusion(s))}</div></div>
       </div></div>
 
       <div class="card"><div class="card-head"><h2 class="card-title"><span class="section-number">4</span>KẾT LUẬN & ẢNH HƯỞNG TỚI IDEA GỐC</h2></div><div class="card-body"><div class="learning-grid">
